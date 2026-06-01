@@ -1,0 +1,161 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Kelola User{% endblock %}
+{% block page_title %}Kelola User Akun{% endblock %}
+{% block breadcrumb %}Home / Kelola User{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="card-title" style="margin: 0;">Daftar User Akun</h2>
+        <a href="{{ url_for('admin_users.add_user') }}" style="padding: 10px 20px; background: #27ae60; color: white; border-radius: 5px; text-decoration: none; font-weight: 500;">
+            ➕ Tambah User Baru
+        </a>
+    </div>
+
+    {% if users %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #ecf0f1;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">ID</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Username</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Nama</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Role</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Link Siswa</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Status</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr style="border-bottom: 1px solid #ecf0f1;">
+                    <td style="padding: 12px;">{{ u.id }}</td>
+                    <td style="padding: 12px;"><strong>{{ u.username }}</strong></td>
+                    <td style="padding: 12px;">{{ u.full_name }}</td>
+                    <td style="padding: 12px;">
+                        <span style="padding: 4px 12px; border-radius: 12px; font-size: 12px; {% if u.role == 'admin' %}background: #e8f5e9; color: #2e7d32;{% else %}background: #e3f2fd; color: #1565c0;{% endif %}">
+                            {{ u.role|upper }}
+                        </span>
+                    </td>
+                    <td style="padding: 12px;">{{ u.nis or '-' }}</td>
+                    <td style="padding: 12px;">
+                        <span style="padding: 4px 12px; border-radius: 12px; font-size: 12px; {% if u.is_active %}background: #d4edda; color: #155724;{% else %}background: #f8d7da; color: #721c24;{% endif %}">
+                            {{ 'Aktif' if u.is_active else 'Nonaktif' }}
+                        </span>
+                    </td>
+                    <td style="padding: 12px;">
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="resetPassword({{ u.id }}, '{{ u.username }}')" style="padding: 6px 12px; background: #f39c12; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">🔑 Reset PW</button>
+                            <button onclick="toggleStatus({{ u.id }}, {{ u.is_active }})" style="padding: 6px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">🔄 Toggle</button>
+                            <button onclick="deleteUser({{ u.id }}, '{{ u.username }}')" style="padding: 6px 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">🗑️ Hapus</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div style="margin-top: 15px; color: #7f8c8d; font-size: 14px;">
+        Total: {{ users|length }} user
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+        <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
+        <p>Tidak ada data user</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function resetPassword(userId, username) {
+    const newPassword = prompt(`Reset password untuk user "${username}".\n\nMasukkan password baru (minimal 6 karakter):`);
+
+    if (!newPassword) {
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        alert('Password minimal 6 karakter!');
+        return;
+    }
+
+    fetch(`/admin/users/${userId}/reset-password`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password: newPassword })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+
+function toggleStatus(userId, currentStatus) {
+    if (!confirm('Yakin ingin mengubah status user ini?')) {
+        return;
+    }
+
+    fetch(`/admin/users/${userId}/toggle`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+
+function deleteUser(userId, username) {
+    if (!confirm(`Yakin ingin menghapus user "${username}"?`)) {
+        return;
+    }
+
+    const confirmText = prompt('Ketik "HAPUS" untuk konfirmasi:');
+    if (confirmText !== 'HAPUS') {
+        alert('Operasi dibatalkan');
+        return;
+    }
+
+    fetch(`/admin/users/${userId}/delete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+</script>
+{% endblock %}

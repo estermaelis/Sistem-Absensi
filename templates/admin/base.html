@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %} - Sistem Absensi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bmw-design.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="top-nav">
+        <div class="nav-brand">Sistem Absensi</div>
+        <div class="nav-menu">
+            <span class="nav-link">{{ user.full_name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+    </div>
+
+    <div style="display: flex;">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('admin.dashboard') }}" class="sidebar-menu-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                        Dashboard
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('admin.students') }}" class="sidebar-menu-link {% if request.endpoint == 'admin.students' %}active{% endif %}">
+                        Kelola Siswa
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('admin_users.users') }}" class="sidebar-menu-link {% if request.endpoint == 'admin_users.users' %}active{% endif %}">
+                        Kelola User
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('admin_users.reports') }}" class="sidebar-menu-link {% if request.endpoint == 'admin_users.reports' %}active{% endif %}">
+                        Laporan
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('admin_users.statistics') }}" class="sidebar-menu-link {% if request.endpoint == 'admin_users.statistics' %}active{% endif %}">
+                        Statistik
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main style="flex: 1; padding: var(--spacing-xl); background: var(--color-surface-soft); min-height: calc(100vh - var(--height-nav));">
+            <div class="card mb-lg">
+                <h1 style="font: var(--font-display-md); color: var(--color-ink); margin: 0 0 var(--spacing-xs) 0;">{% block page_title %}Dashboard{% endblock %}</h1>
+                <div style="font: var(--font-body-sm); color: var(--color-muted);">{% block breadcrumb %}Home{% endblock %}</div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

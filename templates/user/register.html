@@ -1,0 +1,264 @@
+{% extends "user/base.html" %}
+
+{% block title %}Registrasi Wajah{% endblock %}
+{% block page_title %}Registrasi Wajah Saya{% endblock %}
+{% block breadcrumb %}Home / Registrasi Wajah{% endblock %}
+
+{% block extra_css %}
+<style>
+.register-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
+}
+
+.form-section, .camera-section {
+    background: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-none);
+    padding: var(--spacing-xl);
+}
+
+.form-section h3, .camera-section h3 {
+    font: var(--font-title-lg);
+    color: var(--color-ink);
+    margin-bottom: var(--spacing-lg);
+}
+
+.instruction {
+    font: var(--font-body-md);
+    color: var(--color-muted);
+    margin-bottom: var(--spacing-lg);
+}
+
+#videoFeed {
+    width: 100%;
+    max-width: 640px;
+    height: auto;
+    background: var(--color-surface-dark);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-none);
+    margin-bottom: var(--spacing-lg);
+}
+
+.capture-info {
+    margin-bottom: var(--spacing-lg);
+}
+
+.capture-info p {
+    font: var(--font-body-md);
+    color: var(--color-ink);
+    margin-bottom: var(--spacing-sm);
+}
+
+.capture-info span {
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--color-surface-strong);
+    border-radius: var(--rounded-none);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--color-primary);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.message {
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md);
+    border-radius: var(--rounded-none);
+    font: var(--font-body-md);
+}
+
+.message.success {
+    background: var(--color-success);
+    color: var(--color-on-primary);
+}
+
+.message.error {
+    background: var(--color-error);
+    color: var(--color-on-primary);
+}
+
+@media (max-width: 1024px) {
+    .register-container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-lg">
+    <h2 class="card-title" style="margin: 0;">Registrasi Wajah</h2>
+    <p style="font: var(--font-body-sm); color: var(--color-muted); margin-top: var(--spacing-xs);">Daftarkan wajah Anda untuk sistem absensi</p>
+</div>
+
+<div class="register-container">
+    <div class="form-section">
+        <h3>Informasi Siswa</h3>
+        <div class="form-group">
+            <label class="form-label">NIS</label>
+            <input type="text" class="form-input" value="{{ user.username }}" readonly>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Nama Lengkap</label>
+            <input type="text" class="form-input" value="{{ user.full_name }}" readonly>
+        </div>
+
+        <div class="instruction" style="margin-top: var(--spacing-xl);">
+            <h4 style="font: var(--font-title-sm); color: var(--color-ink); margin-bottom: var(--spacing-sm);">Instruksi:</h4>
+            <ul style="font: var(--font-body-sm); color: var(--color-muted); line-height: 1.8; padding-left: var(--spacing-lg);">
+                <li>Pastikan wajah Anda terlihat jelas di kamera</li>
+                <li>Pastikan pencahayaan cukup</li>
+                <li>Hadapkan wajah langsung ke kamera</li>
+                <li>Sistem akan mengambil 30 foto secara otomatis</li>
+                <li>Setelah selesai, jalankan training model</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="camera-section">
+        <h3>Pengambilan Sampel Wajah</h3>
+        <p class="instruction">Klik "Mulai Kamera" untuk memulai pengambilan foto wajah.</p>
+
+        <img id="videoFeed" src="" alt="Video Feed" style="display: none;">
+
+        <div class="capture-info" id="captureInfo" style="display: none;">
+            <p>Status: <span id="captureStatus">Siap</span></p>
+            <div class="progress-bar">
+                <div id="progressBar" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: var(--spacing-sm);">
+            <button id="startCamera" class="btn btn-primary">Mulai Kamera</button>
+            <button id="startCapture" class="btn btn-success" style="display: none;">Ambil Foto (30x)</button>
+            <button id="stopCamera" class="btn btn-secondary" style="display: none;">Stop Kamera</button>
+        </div>
+
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let cameraActive = false;
+let capturing = false;
+
+document.getElementById('startCamera').addEventListener('click', async function() {
+    try {
+        const response = await fetch('/api/start_camera', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({})
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Show video feed
+            document.getElementById('videoFeed').src = '/video_feed';
+            document.getElementById('videoFeed').style.display = 'block';
+            document.getElementById('captureInfo').style.display = 'block';
+
+            // Toggle buttons
+            document.getElementById('startCamera').style.display = 'none';
+            document.getElementById('startCapture').style.display = 'inline-block';
+            document.getElementById('stopCamera').style.display = 'inline-block';
+
+            cameraActive = true;
+            showMessage('Kamera berhasil diaktifkan', 'success');
+        } else {
+            showMessage(result.message, 'error');
+        }
+    } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+    }
+});
+
+document.getElementById('startCapture').addEventListener('click', async function() {
+    if (capturing) return;
+
+    capturing = true;
+    document.getElementById('startCapture').disabled = true;
+    document.getElementById('captureStatus').textContent = 'Mengambil foto...';
+
+    try {
+        const response = await fetch('/api/capture_samples', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                student_id: {{ user.student_id }}
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('captureStatus').textContent = 'Selesai!';
+            showMessage(result.message + ' - Silakan jalankan training model.', 'success');
+        } else {
+            showMessage(result.message, 'error');
+        }
+    } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+    } finally {
+        capturing = false;
+        document.getElementById('startCapture').disabled = false;
+    }
+});
+
+document.getElementById('stopCamera').addEventListener('click', async function() {
+    try {
+        const response = await fetch('/api/stop_camera', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({})
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Hide video feed
+            document.getElementById('videoFeed').style.display = 'none';
+            document.getElementById('videoFeed').src = '';
+            document.getElementById('captureInfo').style.display = 'none';
+
+            // Toggle buttons
+            document.getElementById('startCamera').style.display = 'inline-block';
+            document.getElementById('startCapture').style.display = 'none';
+            document.getElementById('stopCamera').style.display = 'none';
+
+            cameraActive = false;
+            showMessage('Kamera dimatikan', 'success');
+        }
+    } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+    }
+});
+
+function showMessage(message, type) {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = message;
+    messageEl.className = 'message ' + type;
+    messageEl.style.display = 'block';
+
+    setTimeout(() => {
+        messageEl.style.display = 'none';
+    }, 5000);
+}
+</script>
+{% endblock %}

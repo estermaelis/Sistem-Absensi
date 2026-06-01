@@ -1,0 +1,85 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Dashboard Admin{% endblock %}
+{% block page_title %}Dashboard Admin{% endblock %}
+{% block breadcrumb %}Home / Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Total Siswa Aktif</div>
+        <div style="font-size: 36px; font-weight: bold;">{{ total_students }}</div>
+        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">👥 Siswa terdaftar</div>
+    </div>
+
+    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Total User Aktif</div>
+        <div style="font-size: 36px; font-weight: bold;">{{ total_users }}</div>
+        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">🔑 Akun user</div>
+    </div>
+
+    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Absensi Hari Ini</div>
+        <div style="font-size: 36px; font-weight: bold;">{{ today_attendance }}</div>
+        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">📸 Hadir hari ini</div>
+    </div>
+
+    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Absensi Bulan Ini</div>
+        <div style="font-size: 36px; font-weight: bold;">{{ monthly_attendance }}</div>
+        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">📅 Siswa hadir</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Menu Cepat</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <a href="{{ url_for('admin.students') }}" style="display: block; padding: 20px; background: #3498db; color: white; text-align: center; border-radius: 5px; text-decoration: none; transition: transform 0.2s;">
+            <div style="font-size: 32px; margin-bottom: 10px;">👥</div>
+            <div style="font-weight: 500;">Kelola Siswa</div>
+        </a>
+
+        <a href="{{ url_for('admin_users.users') }}" style="display: block; padding: 20px; background: #9b59b6; color: white; text-align: center; border-radius: 5px; text-decoration: none; transition: transform 0.2s;">
+            <div style="font-size: 32px; margin-bottom: 10px;">🔑</div>
+            <div style="font-weight: 500;">Kelola User</div>
+        </a>
+
+        <a href="{{ url_for('admin_users.reports') }}" style="display: block; padding: 20px; background: #34495e; color: white; text-align: center; border-radius: 5px; text-decoration: none; transition: transform 0.2s;">
+            <div style="font-size: 32px; margin-bottom: 10px;">📋</div>
+            <div style="font-weight: 500;">Laporan</div>
+        </a>
+
+        <a href="{{ url_for('admin_users.statistics') }}" style="display: block; padding: 20px; background: #16a085; color: white; text-align: center; border-radius: 5px; text-decoration: none; transition: transform 0.2s;">
+            <div style="font-size: 32px; margin-bottom: 10px;">📈</div>
+            <div style="font-weight: 500;">Statistik</div>
+        </a>
+
+        <a href="{{ url_for('logout') }}" style="display: block; padding: 20px; background: #95a5a6; color: white; text-align: center; border-radius: 5px; text-decoration: none; transition: transform 0.2s;">
+            <div style="font-size: 32px; margin-bottom: 10px;">🚪</div>
+            <div style="font-weight: 500;">Logout</div>
+        </a>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 20px;">
+    <h2 class="card-title">Informasi Sistem</h2>
+    <div style="color: #7f8c8d; line-height: 1.8;">
+        <p><strong>Selamat datang, {{ user.full_name }}!</strong></p>
+        <p>Anda login sebagai <strong>Administrator</strong>. Anda memiliki akses penuh ke semua fitur sistem.</p>
+        <p>Gunakan menu di sidebar atau menu cepat di atas untuk mengakses fitur yang Anda butuhkan.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card:hover {
+        transform: translateY(-5px);
+        transition: transform 0.3s;
+    }
+    a[style*="background"]:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+</style>
+{% endblock %}

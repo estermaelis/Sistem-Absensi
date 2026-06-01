@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Training Model - Sistem Absensi{% endblock %}
+
+{% block content %}
+<div class="train-page">
+    <h2>Training Model Face Recognition</h2>
+
+    <div class="train-container">
+        <div class="info-box">
+            <h3>ℹ️ Informasi</h3>
+            <p>Training model diperlukan setelah:</p>
+            <ul>
+                <li>Menambahkan siswa baru</li>
+                <li>Menambahkan sampel wajah baru</li>
+                <li>Pertama kali setup sistem</li>
+            </ul>
+            <p><strong>Proses training membutuhkan waktu beberapa detik hingga beberapa menit tergantung jumlah data.</strong></p>
+        </div>
+
+        <div class="train-action">
+            <button id="startTraining" class="btn btn-primary btn-lg">🚀 Mulai Training</button>
+        </div>
+
+        <div id="trainingStatus" class="status-box" style="display: none;">
+            <div class="loader"></div>
+            <p id="statusText">Memproses...</p>
+        </div>
+
+        <div id="trainingResult" class="result-box" style="display: none;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/train.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Kelola Siswa{% endblock %}
+{% block page_title %}Kelola Siswa/Karyawan{% endblock %}
+{% block breadcrumb %}Home / Kelola Siswa{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="card-title" style="margin: 0;">Daftar Siswa/Karyawan</h2>
+        <form method="GET" action="{{ url_for('admin.search_students') }}" style="display: flex; gap: 10px;">
+            <input type="text" name="q" placeholder="Cari NIS atau Nama..." value="{{ search_keyword or '' }}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; width: 250px;">
+            <button type="submit" style="padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">🔍 Cari</button>
+            {% if search_keyword %}
+            <a href="{{ url_for('admin.students') }}" style="padding: 8px 16px; background: #95a5a6; color: white; border-radius: 5px; text-decoration: none;">✖ Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if search_keyword %}
+    <div style="margin-bottom: 15px; color: #7f8c8d;">
+        Hasil pencarian untuk: <strong>{{ search_keyword }}</strong>
+    </div>
+    {% endif %}
+
+    {% if students %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #ecf0f1;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">ID</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">NIS</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Nama</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Kelas</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Gender</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Status</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr style="border-bottom: 1px solid #ecf0f1;" id="row-{{ student.id }}">
+                    <td style="padding: 12px;">{{ student.id }}</td>
+                    <td style="padding: 12px;">{{ student.nis }}</td>
+                    <td style="padding: 12px;"><strong>{{ student.name }}</strong></td>
+                    <td style="padding: 12px;">{{ student.class_name or '-' }}</td>
+                    <td style="padding: 12px;">{{ 'L' if student.gender == 'L' else 'P' }}</td>
+                    <td style="padding: 12px;">
+                        <span class="status-badge" style="padding: 4px 12px; border-radius: 12px; font-size: 12px; {% if student.is_active %}background: #d4edda; color: #155724;{% else %}background: #f8d7da; color: #721c24;{% endif %}">
+                            {{ 'Aktif' if student.is_active else 'Nonaktif' }}
+                        </span>
+                    </td>
+                    <td style="padding: 12px;">
+                        <div style="display: flex; gap: 5px;">
+                            <a href="{{ url_for('admin.edit_student', student_id=student.id) }}" style="padding: 6px 12px; background: #3498db; color: white; border-radius: 4px; text-decoration: none; font-size: 13px;">✏️ Edit</a>
+                            <button onclick="toggleStatus({{ student.id }}, {{ student.is_active }})" style="padding: 6px 12px; background: #f39c12; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">🔄 Toggle</button>
+                            <button onclick="deleteStudent({{ student.id }}, '{{ student.name }}')" style="padding: 6px 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">🗑️ Hapus</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div style="margin-top: 15px; color: #7f8c8d; font-size: 14px;">
+        Total: {{ students|length }} siswa/karyawan
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+        <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
+        <p>Tidak ada data siswa/karyawan</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleStatus(studentId, currentStatus) {
+    if (!confirm('Yakin ingin mengubah status siswa ini?')) {
+        return;
+    }
+
+    fetch(`/admin/students/${studentId}/toggle`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+
+function deleteStudent(studentId, studentName) {
+    if (!confirm(`Yakin ingin menghapus siswa "${studentName}"?\n\nPeringatan: Semua data terkait (sampel wajah, riwayat absensi) akan ikut terhapus!`)) {
+        return;
+    }
+
+    const confirmText = prompt('Ketik "HAPUS" untuk konfirmasi:');
+    if (confirmText !== 'HAPUS') {
+        alert('Operasi dibatalkan');
+        return;
+    }
+
+    fetch(`/admin/students/${studentId}/delete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+</script>
+{% endblock %}

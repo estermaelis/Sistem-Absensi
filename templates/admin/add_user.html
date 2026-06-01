@@ -1,0 +1,103 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Tambah User{% endblock %}
+{% block page_title %}Tambah User Baru{% endblock %}
+{% block breadcrumb %}Home / Kelola User / Tambah{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">Form Tambah User</h2>
+
+    <form method="POST" action="{{ url_for('admin_users.add_user') }}">
+        <div style="max-width: 600px;">
+            <div id="usernameField" style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500;">Username <span style="color: red;">*</span></label>
+                <input type="text" name="username" id="usernameInput" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                <small style="color: #7f8c8d;">Username untuk login (hanya untuk Admin)</small>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500;">Role <span style="color: red;">*</span></label>
+                <select name="role" id="roleSelect" required onchange="toggleFields()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                    <option value="">-- Pilih Role --</option>
+                    <option value="admin">Admin</option>
+                    <option value="user">User (Siswa)</option>
+                </select>
+            </div>
+
+            <div id="nisField" style="margin-bottom: 20px; display: none;">
+                <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500;">NIS Siswa <span style="color: red;">*</span></label>
+                <select name="nis" id="nisSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                    <option value="">-- Pilih Siswa --</option>
+                    {% for student in students %}
+                    <option value="{{ student.nis }}">{{ student.nis }} - {{ student.name }}</option>
+                    {% endfor %}
+                </select>
+                <small style="color: #7f8c8d;">NIS akan digunakan sebagai username untuk login</small>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500;">Password <span style="color: red;">*</span></label>
+                <input type="password" name="password" required minlength="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                <small style="color: #7f8c8d;">Minimal 6 karakter</small>
+            </div>
+
+            <div id="fullNameField" style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500;">Nama Lengkap <span style="color: red;">*</span></label>
+                <input type="text" name="full_name" id="fullNameInput" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                <small style="color: #7f8c8d;" id="fullNameNote">Nama lengkap (hanya untuk Admin)</small>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button type="submit" style="padding: 12px 24px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                    ➕ Tambah User
+                </button>
+                <a href="{{ url_for('admin_users.users') }}" style="padding: 12px 24px; background: #95a5a6; color: white; border-radius: 5px; text-decoration: none; font-size: 14px; font-weight: 500; display: inline-block;">
+                    ← Kembali
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFields() {
+    const roleSelect = document.getElementById('roleSelect');
+    const usernameField = document.getElementById('usernameField');
+    const usernameInput = document.getElementById('usernameInput');
+    const nisField = document.getElementById('nisField');
+    const nisSelect = document.getElementById('nisSelect');
+    const fullNameField = document.getElementById('fullNameField');
+    const fullNameInput = document.getElementById('fullNameInput');
+    const fullNameNote = document.getElementById('fullNameNote');
+
+    if (roleSelect.value === 'user') {
+        // Untuk User: sembunyikan username & nama lengkap, tampilkan NIS
+        usernameField.style.display = 'none';
+        usernameInput.removeAttribute('required');
+        fullNameField.style.display = 'none';
+        fullNameInput.removeAttribute('required');
+        nisField.style.display = 'block';
+        nisSelect.setAttribute('required', 'required');
+    } else if (roleSelect.value === 'admin') {
+        // Untuk Admin: tampilkan username & nama lengkap, sembunyikan NIS
+        usernameField.style.display = 'block';
+        usernameInput.setAttribute('required', 'required');
+        fullNameField.style.display = 'block';
+        fullNameInput.setAttribute('required', 'required');
+        nisField.style.display = 'none';
+        nisSelect.removeAttribute('required');
+    } else {
+        // Default: sembunyikan semua
+        usernameField.style.display = 'none';
+        usernameInput.removeAttribute('required');
+        fullNameField.style.display = 'none';
+        fullNameInput.removeAttribute('required');
+        nisField.style.display = 'none';
+        nisSelect.removeAttribute('required');
+    }
+}
+</script>
+{% endblock %}

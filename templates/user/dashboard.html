@@ -1,0 +1,149 @@
+{% extends "user/base.html" %}
+
+{% block title %}Dashboard User{% endblock %}
+{% block page_title %}Dashboard Saya{% endblock %}
+{% block breadcrumb %}Home / Dashboard{% endblock %}
+
+{% block content %}
+{% if student %}
+<div class="card">
+    <h2 class="card-title">Informasi Profil</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <div>
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">NIS</div>
+            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ student.nis }}</div>
+        </div>
+        <div>
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Nama</div>
+            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ student.name }}</div>
+        </div>
+        <div>
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Kelas</div>
+            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ student.class_name or '-' }}</div>
+        </div>
+        <div>
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Gender</div>
+            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ 'Laki-laki' if student.gender == 'L' else 'Perempuan' }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Total Kehadiran</div>
+        <div style="font-size: 36px; font-weight: bold;">{{ stats.total_kehadiran or 0 }}</div>
+        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">📅 Hari</div>
+    </div>
+
+    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Tepat Waktu</div>
+        <div style="font-size: 36px; font-weight: bold;">{{ stats.hadir_tepat_waktu or 0 }}</div>
+        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">✅ Hari</div>
+    </div>
+
+    <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Terlambat</div>
+        <div style="font-size: 36px; font-weight: bold;">{{ stats.terlambat or 0 }}</div>
+        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">⏰ Hari</div>
+    </div>
+
+    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Bulan Ini</div>
+        <div style="font-size: 36px; font-weight: bold;">{{ monthly.total or 0 }}</div>
+        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">📆 Hari</div>
+    </div>
+</div>
+
+{% if recent %}
+<div class="card">
+    <h2 class="card-title">Absensi Terbaru</h2>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #ecf0f1;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Tanggal</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Jam Masuk</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Status</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Confidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in recent %}
+                <tr style="border-bottom: 1px solid #ecf0f1;">
+                    <td style="padding: 12px;">{{ record.attendance_date.strftime('%d-%m-%Y') }}</td>
+                    <td style="padding: 12px;">{{ record.check_in_time }}</td>
+                    <td style="padding: 12px;">
+                        <span style="padding: 4px 12px; border-radius: 12px; font-size: 12px; {% if record.status == 'Hadir' %}background: #d4edda; color: #155724;{% else %}background: #fff3cd; color: #856404;{% endif %}">
+                            {{ record.status }}
+                        </span>
+                    </td>
+                    <td style="padding: 12px;">
+                        {% if record.confidence %}
+                            {{ "%.2f"|format(record.confidence) }}%
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div style="margin-top: 15px;">
+        <a href="{{ url_for('user.attendance') }}" style="display: inline-block; padding: 10px 20px; background: #3498db; color: white; border-radius: 5px; text-decoration: none;">
+            Lihat Semua Riwayat →
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2 class="card-title">Menu Cepat</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+        <a href="{{ url_for('user.profile') }}" style="display: block; padding: 20px; background: #3498db; color: white; text-align: center; border-radius: 5px; text-decoration: none;">
+            <div style="font-size: 32px; margin-bottom: 10px;">👤</div>
+            <div style="font-weight: 500;">Profil Saya</div>
+        </a>
+
+        <a href="{{ url_for('user.attendance') }}" style="display: block; padding: 20px; background: #9b59b6; color: white; text-align: center; border-radius: 5px; text-decoration: none;">
+            <div style="font-size: 32px; margin-bottom: 10px;">📋</div>
+            <div style="font-weight: 500;">Riwayat Absensi</div>
+        </a>
+
+        <a href="{{ url_for('user.statistics') }}" style="display: block; padding: 20px; background: #e74c3c; color: white; text-align: center; border-radius: 5px; text-decoration: none;">
+            <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
+            <div style="font-weight: 500;">Statistik</div>
+        </a>
+
+        <a href="{{ url_for('user.change_password_page') }}" style="display: block; padding: 20px; background: #f39c12; color: white; text-align: center; border-radius: 5px; text-decoration: none;">
+            <div style="font-size: 32px; margin-bottom: 10px;">🔑</div>
+            <div style="font-weight: 500;">Ganti Password</div>
+        </a>
+    </div>
+</div>
+
+{% else %}
+<div class="card">
+    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+        <div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
+        <h2 style="color: #e74c3c; margin-bottom: 10px;">Akun Tidak Terhubung</h2>
+        <p>Akun Anda belum terhubung dengan data siswa/karyawan.</p>
+        <p>Silakan hubungi administrator untuk menghubungkan akun Anda.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card:hover {
+        transform: translateY(-5px);
+        transition: transform 0.3s;
+    }
+    a[style*="background"]:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        transition: all 0.3s;
+    }
+</style>
+{% endblock %}

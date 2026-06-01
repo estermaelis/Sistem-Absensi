@@ -1,0 +1,100 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Laporan{% endblock %}
+{% block page_title %}Laporan Absensi{% endblock %}
+{% block breadcrumb %}Home / Laporan{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">Jenis Laporan</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 15px;">📅</div>
+            <h3 style="margin: 0 0 10px; color: #2c3e50;">Laporan Harian</h3>
+            <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 15px;">Lihat absensi per tanggal tertentu</p>
+            <form method="GET" action="{{ url_for('admin_users.daily_report') }}" style="margin-bottom: 10px;">
+                <input type="date" name="date" value="{{ today }}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px;">
+                <button type="submit" style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Lihat Laporan
+                </button>
+            </form>
+        </div>
+
+        <div style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 15px;">📊</div>
+            <h3 style="margin: 0 0 10px; color: #2c3e50;">Statistik Kehadiran</h3>
+            <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 15px;">Lihat statistik keseluruhan dan bulanan</p>
+            <a href="{{ url_for('admin_users.statistics') }}" style="display: block; width: 100%; padding: 10px; background: #27ae60; color: white; border-radius: 4px; text-decoration: none;">
+                Lihat Statistik
+            </a>
+        </div>
+
+        <div style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 15px;">📥</div>
+            <h3 style="margin: 0 0 10px; color: #2c3e50;">Export ke CSV</h3>
+            <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 15px;">Download laporan dalam format CSV</p>
+            <p style="color: #95a5a6; font-size: 13px;">Fitur akan segera tersedia</p>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 20px;">
+    <h2 class="card-title">Laporan Cepat - Hari Ini</h2>
+    <div id="todayReport">
+        <p style="text-align: center; color: #7f8c8d;">Loading...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Set today's date
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(input => {
+        if (!input.value) {
+            input.value = today;
+        }
+    });
+
+    // Load today's report
+    loadTodayReport();
+});
+
+function loadTodayReport() {
+    fetch('/api/attendance/today')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('todayReport');
+            if (data.success && data.data.length > 0) {
+                let html = '<table style="width: 100%; border-collapse: collapse;">';
+                html += '<thead><tr style="background: #ecf0f1;">';
+                html += '<th style="padding: 10px; text-align: left; border-bottom: 2px solid #bdc3c7;">NIS</th>';
+                html += '<th style="padding: 10px; text-align: left; border-bottom: 2px solid #bdc3c7;">Nama</th>';
+                html += '<th style="padding: 10px; text-align: left; border-bottom: 2px solid #bdc3c7;">Jam Masuk</th>';
+                html += '<th style="padding: 10px; text-align: left; border-bottom: 2px solid #bdc3c7;">Status</th>';
+                html += '</tr></thead><tbody>';
+
+                data.data.forEach(record => {
+                    html += '<tr style="border-bottom: 1px solid #ecf0f1;">';
+                    html += `<td style="padding: 10px;">${record.nis}</td>`;
+                    html += `<td style="padding: 10px;">${record.name}</td>`;
+                    html += `<td style="padding: 10px;">${record.check_in_time}</td>`;
+                    html += `<td style="padding: 10px;"><span style="padding: 4px 12px; border-radius: 12px; font-size: 12px; ${record.status === 'Hadir' ? 'background: #d4edda; color: #155724;' : 'background: #fff3cd; color: #856404;'}">${record.status}</span></td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                html += `<p style="margin-top: 15px; color: #7f8c8d; font-size: 14px;">Total: ${data.data.length} siswa hadir hari ini</p>`;
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">Belum ada absensi hari ini</p>';
+            }
+        })
+        .catch(error => {
+            document.getElementById('todayReport').innerHTML = '<p style="text-align: center; color: #e74c3c;">Error loading data</p>';
+        });
+}
+</script>
+{% endblock %}

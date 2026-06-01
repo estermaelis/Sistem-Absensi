@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sistem Absensi{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h2>Dashboard</h2>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+                <h3>Total Siswa</h3>
+                <p class="stat-number">{{ total_students }}</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <h3>Hadir Hari Ini</h3>
+                <p class="stat-number">{{ today_attendance }}</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-info">
+                <h3>Persentase</h3>
+                <p class="stat-number">
+                    {% if total_students > 0 %}
+                        {{ "%.1f"|format((today_attendance / total_students * 100)) }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="recent-section">
+        <h3>Absensi Terbaru Hari Ini</h3>
+        {% if recent_attendance %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>NIS</th>
+                    <th>Nama</th>
+                    <th>Jam Masuk</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in recent_attendance %}
+                <tr>
+                    <td>{{ record.nis }}</td>
+                    <td>{{ record.name }}</td>
+                    <td>{{ record.check_in_time }}</td>
+                    <td>
+                        <span class="badge badge-{{ 'success' if record.status == 'Hadir' else 'warning' }}">
+                            {{ record.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="no-data">Belum ada absensi hari ini</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

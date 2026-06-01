@@ -1,0 +1,79 @@
+{% extends "user/base.html" %}
+
+{% block title %}Profil Saya{% endblock %}
+{% block page_title %}Profil Saya{% endblock %}
+{% block breadcrumb %}Home / Profil{% endblock %}
+
+{% block content %}
+{% if student %}
+<div class="card">
+    <h2 class="card-title">Informasi Pribadi</h2>
+    <div style="max-width: 600px;">
+        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">NIS/ID</div>
+            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ student.nis }}</div>
+        </div>
+
+        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Nama Lengkap</div>
+            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ student.name }}</div>
+        </div>
+
+        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Kelas/Divisi</div>
+            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ student.class_name or '-' }}</div>
+        </div>
+
+        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Jenis Kelamin</div>
+            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ 'Laki-laki' if student.gender == 'L' else 'Perempuan' }}</div>
+        </div>
+
+        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Status</div>
+            <div style="font-size: 18px; font-weight: bold;">
+                <span style="padding: 6px 16px; border-radius: 12px; {% if student.is_active %}background: #d4edda; color: #155724;{% else %}background: #f8d7da; color: #721c24;{% endif %}">
+                    {{ 'Aktif' if student.is_active else 'Nonaktif' }}
+                </span>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Terdaftar Sejak</div>
+            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ student.created_at.strftime('%d %B %Y') }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Informasi Akun</h2>
+    <div style="max-width: 600px;">
+        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Username</div>
+            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ user.username }}</div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Nama Lengkap</div>
+            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ user.full_name }}</div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <a href="{{ url_for('user.change_password_page') }}" style="display: inline-block; padding: 12px 24px; background: #3498db; color: white; border-radius: 5px; text-decoration: none; font-weight: 500;">
+                🔑 Ganti Password
+            </a>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="card">
+    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+        <div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
+        <h2 style="color: #e74c3c; margin-bottom: 10px;">Akun Tidak Terhubung</h2>
+        <p>Akun Anda belum terhubung dengan data siswa/karyawan.</p>
+        <p>Silakan hubungi administrator untuk menghubungkan akun Anda.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

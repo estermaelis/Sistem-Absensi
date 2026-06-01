@@ -1,0 +1,164 @@
+{% extends "user/base.html" %}
+
+{% block title %}Riwayat Absensi{% endblock %}
+{% block page_title %}Riwayat Absensi Saya{% endblock %}
+{% block breadcrumb %}Home / Riwayat Absensi{% endblock %}
+
+{% block extra_css %}
+<style>
+.filter-section {
+    background: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-none);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.filter-section h3 {
+    font: var(--font-title-lg);
+    color: var(--color-ink);
+    margin-bottom: var(--spacing-lg);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-lg);
+}
+
+.filter-buttons .btn {
+    flex: 0 0 auto;
+}
+
+.custom-date-filter {
+    display: none;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-hairline);
+}
+
+.custom-date-filter.active {
+    display: block;
+}
+
+.date-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: var(--spacing-md);
+    align-items: end;
+}
+
+@media (max-width: 768px) {
+    .date-inputs {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-lg">
+    <h2 class="card-title" style="margin: 0;">Riwayat Absensi</h2>
+    <p style="font: var(--font-body-sm); color: var(--color-muted); margin-top: var(--spacing-xs);">Lihat riwayat kehadiran Anda</p>
+</div>
+
+<div class="filter-section">
+    <h3>Filter Periode</h3>
+
+    <div class="filter-buttons">
+        <a href="{{ url_for('user.attendance', filter='all') }}"
+           class="btn {% if filter_type == 'all' %}btn-primary{% else %}btn-secondary{% endif %}">
+            Semua
+        </a>
+        <a href="{{ url_for('user.attendance', filter='7days') }}"
+           class="btn {% if filter_type == '7days' %}btn-primary{% else %}btn-secondary{% endif %}">
+            7 Hari Terakhir
+        </a>
+        <a href="{{ url_for('user.attendance', filter='30days') }}"
+           class="btn {% if filter_type == '30days' %}btn-primary{% else %}btn-secondary{% endif %}">
+            30 Hari Terakhir
+        </a>
+        <button type="button" id="btnCustomFilter"
+                class="btn {% if filter_type == 'custom' %}btn-primary{% else %}btn-secondary{% endif %}">
+            Custom
+        </button>
+    </div>
+
+    <div id="customDateFilter" class="custom-date-filter {% if filter_type == 'custom' %}active{% endif %}">
+        <form method="GET" action="{{ url_for('user.attendance') }}">
+            <input type="hidden" name="filter" value="custom">
+            <div class="date-inputs">
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="start_date">Dari Tanggal</label>
+                    <input type="date" id="start_date" name="start_date" class="form-input"
+                           value="{{ start_date }}" required>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" for="end_date">Sampai Tanggal</label>
+                    <input type="date" id="end_date" name="end_date" class="form-input"
+                           value="{{ end_date }}" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <h3 class="card-title">Data Absensi</h3>
+
+    {% if records %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Tanggal</th>
+                    <th>Jam Masuk</th>
+                    <th>Status</th>
+                    <th>Confidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ record.attendance_date.strftime('%d %B %Y') }}</td>
+                    <td>{{ record.check_in_time }}</td>
+                    <td>
+                        {% if record.status == 'Hadir' %}
+                        <span class="badge badge-success">{{ record.status }}</span>
+                        {% else %}
+                        <span class="badge badge-warning">{{ record.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ "%.1f"|format(record.confidence) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--color-hairline);">
+        <p style="font: var(--font-body-sm); color: var(--color-muted);">
+            Total: <strong>{{ records|length }}</strong> record
+        </p>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: var(--spacing-xxl); color: var(--color-muted);">
+        <p style="font: var(--font-body-lg); margin-bottom: var(--spacing-sm);">Tidak ada data absensi</p>
+        <p style="font: var(--font-body-sm);">Belum ada riwayat absensi untuk periode yang dipilih</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('btnCustomFilter').addEventListener('click', function() {
+    const customFilter = document.getElementById('customDateFilter');
+    customFilter.classList.toggle('active');
+});
+</script>
+{% endblock %}

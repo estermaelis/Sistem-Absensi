@@ -1,0 +1,106 @@
+{% extends "user/base.html" %}
+
+{% block title %}Statistik Saya{% endblock %}
+{% block page_title %}Statistik Kehadiran Saya{% endblock %}
+{% block breadcrumb %}Home / Statistik{% endblock %}
+
+{% block content %}
+{% if overall and overall.total_kehadiran > 0 %}
+<div class="card">
+    <h2 class="card-title">Statistik Keseluruhan</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <div style="background: #e3f2fd; padding: 20px; border-radius: 8px;">
+            <div style="color: #1565c0; font-size: 14px; margin-bottom: 5px;">Total Kehadiran</div>
+            <div style="font-size: 32px; font-weight: bold; color: #0d47a1;">{{ overall.total_kehadiran }}</div>
+            <div style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">hari</div>
+        </div>
+        <div style="background: #e8f5e9; padding: 20px; border-radius: 8px;">
+            <div style="color: #2e7d32; font-size: 14px; margin-bottom: 5px;">Tepat Waktu</div>
+            <div style="font-size: 32px; font-weight: bold; color: #1b5e20;">{{ overall.hadir_tepat_waktu }}</div>
+            <div style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">hari</div>
+        </div>
+        <div style="background: #fff3e0; padding: 20px; border-radius: 8px;">
+            <div style="color: #e65100; font-size: 14px; margin-bottom: 5px;">Terlambat</div>
+            <div style="font-size: 32px; font-weight: bold; color: #bf360c;">{{ overall.terlambat }}</div>
+            <div style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">hari</div>
+        </div>
+        <div style="background: #f3e5f5; padding: 20px; border-radius: 8px;">
+            <div style="color: #6a1b9a; font-size: 14px; margin-bottom: 5px;">Persentase Tepat Waktu</div>
+            <div style="font-size: 32px; font-weight: bold; color: #4a148c;">
+                {{ "%.1f"|format((overall.hadir_tepat_waktu / overall.total_kehadiran * 100) if overall.total_kehadiran > 0 else 0) }}%
+            </div>
+        </div>
+    </div>
+
+    {% if overall.avg_confidence %}
+    <div style="margin-top: 15px; padding: 15px; background: #fce4ec; border-radius: 8px;">
+        <div style="color: #c2185b; font-size: 14px;">Rata-rata Confidence</div>
+        <div style="font-size: 24px; font-weight: bold; color: #880e4f;">{{ "%.2f"|format(overall.avg_confidence) }}%</div>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 15px; padding: 15px; background: #e0f2f1; border-radius: 8px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div>
+                <div style="color: #00695c; font-size: 13px;">Absensi Pertama</div>
+                <div style="font-size: 16px; font-weight: bold; color: #004d40;">
+                    {% if overall.first_attendance %}
+                        {{ overall.first_attendance.strftime('%d-%m-%Y') }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <div style="color: #00695c; font-size: 13px;">Absensi Terakhir</div>
+                <div style="font-size: 16px; font-weight: bold; color: #004d40;">
+                    {% if overall.last_attendance %}
+                        {{ overall.last_attendance.strftime('%d-%m-%Y') }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if monthly_stats %}
+<div class="card" style="margin-top: 20px;">
+    <h2 class="card-title">Statistik Per Bulan (Tahun Ini)</h2>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #ecf0f1;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Bulan</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Total</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Tepat Waktu</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Terlambat</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] %}
+                {% for stat in monthly_stats %}
+                <tr style="border-bottom: 1px solid #ecf0f1;">
+                    <td style="padding: 12px;"><strong>{{ months[stat.bulan - 1] }}</strong></td>
+                    <td style="padding: 12px;">{{ stat.total }}</td>
+                    <td style="padding: 12px;">{{ stat.hadir }}</td>
+                    <td style="padding: 12px;">{{ stat.terlambat }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="card">
+    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+        <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
+        <p>Belum ada data statistik</p>
+        <p style="font-size: 14px;">Mulai absen untuk melihat statistik kehadiran Anda</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

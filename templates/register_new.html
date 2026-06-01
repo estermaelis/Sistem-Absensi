@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrasi Mahasiswa Baru - Sistem Absensi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bmw-design.css') }}">
+    <style>
+        body {
+            background: var(--color-surface-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg);
+        }
+        .register-container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--color-canvas);
+            border: 1px solid var(--color-hairline);
+            border-radius: var(--rounded-none);
+            padding: var(--spacing-xxl);
+        }
+        .register-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+        .register-header h1 {
+            font: var(--font-display-md);
+            color: var(--color-ink);
+            margin-bottom: var(--spacing-sm);
+        }
+        .register-header p {
+            font: var(--font-body-md);
+            color: var(--color-muted);
+        }
+        .register-footer {
+            text-align: center;
+            margin-top: var(--spacing-xl);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--color-hairline);
+        }
+        .register-footer p {
+            font: var(--font-body-sm);
+            color: var(--color-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <h1>Registrasi Mahasiswa Baru</h1>
+            <p>Daftar untuk menggunakan Sistem Absensi Face Recognition</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register_new') }}" id="registerForm">
+            <div class="form-group">
+                <label class="form-label form-label-required" for="nis">NIS / NIM</label>
+                <input type="text" id="nis" name="nis" class="form-input" required autofocus>
+                <span class="form-help">Nomor Induk Siswa / Mahasiswa</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label form-label-required" for="name">Nama Lengkap</label>
+                <input type="text" id="name" name="name" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="class_name">Kelas / Jurusan</label>
+                <input type="text" id="class_name" name="class_name" class="form-input" placeholder="Contoh: XII IPA 1 / Teknik Informatika">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label form-label-required" for="gender">Jenis Kelamin</label>
+                <select id="gender" name="gender" class="form-select" required>
+                    <option value="">Pilih...</option>
+                    <option value="L">Laki-laki</option>
+                    <option value="P">Perempuan</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label form-label-required" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required minlength="6">
+                <span class="form-help">Minimal 6 karakter</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label form-label-required" for="confirm_password">Konfirmasi Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" required minlength="6">
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btnRegister" style="width: 100%;">
+                Daftar
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: var(--spacing-lg);">
+            <p style="font: var(--font-body-sm); color: var(--color-muted);">
+                Sudah punya akun?
+                <a href="{{ url_for('login') }}" style="color: var(--color-primary); font-weight: 500; text-decoration: none;">
+                    Login di sini
+                </a>
+            </p>
+        </div>
+
+        <div class="register-footer">
+            <p>&copy; 2026 Sistem Absensi Face Recognition</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Password dan Konfirmasi Password tidak cocok!');
+                return false;
+            }
+
+            const btn = document.getElementById('btnRegister');
+            btn.disabled = true;
+            btn.textContent = 'Mendaftar...';
+        });
+    </script>
+</body>
+</html>
