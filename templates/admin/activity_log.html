@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Log Aktivitas{% endblock %}
+{% block page_title %}Log Aktivitas Sistem{% endblock %}
+{% block breadcrumb %}Home / Log Aktivitas{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">Aktivitas Terbaru (maks. 200)</h2>
+
+    {% if logs %}
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Waktu</th>
+                    <th>User</th>
+                    <th>Aksi</th>
+                    <th>Detail</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td style="white-space: nowrap;">{{ log.created_at.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                    <td>{{ log.username or '-' }}</td>
+                    <td><span class="badge badge-primary">{{ log.action }}</span></td>
+                    <td class="text-muted">{{ log.detail or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-md text-muted" style="font: var(--font-body-sm);">
+        Menampilkan {{ logs|length }} aktivitas terakhir
+    </div>
+    {% else %}
+    <div class="text-center text-muted" style="padding: var(--spacing-xxl);">
+        <p>Belum ada aktivitas tercatat</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -16,7 +16,7 @@
 .form-section, .camera-section {
     background: var(--color-canvas);
     border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-none);
+    border-radius: var(--rounded-lg);
     padding: var(--spacing-xl);
 }
 
@@ -38,7 +38,7 @@
     height: auto;
     background: var(--color-surface-dark);
     border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-none);
+    border-radius: var(--rounded-lg);
     margin-bottom: var(--spacing-lg);
 }
 
@@ -61,7 +61,7 @@
     width: 100%;
     height: 8px;
     background: var(--color-surface-strong);
-    border-radius: var(--rounded-none);
+    border-radius: var(--rounded-pill);
     overflow: hidden;
 }
 
@@ -75,7 +75,7 @@
 .message {
     margin-top: var(--spacing-lg);
     padding: var(--spacing-md);
-    border-radius: var(--rounded-none);
+    border-radius: var(--rounded-md);
     font: var(--font-body-md);
 }
 
@@ -89,6 +89,76 @@
     color: var(--color-on-primary);
 }
 
+.message.info {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.steps-progress {
+    margin-bottom: var(--spacing-lg);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-sm);
+}
+
+.step-card {
+    border: 1px solid var(--color-hairline);
+    padding: var(--spacing-sm);
+    background: var(--color-surface);
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.step-card.active {
+    opacity: 1 !important;
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+}
+
+.step-card.completed {
+    opacity: 1 !important;
+    border-color: var(--color-success) !important;
+}
+
+.step-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: var(--color-muted-soft);
+    color: white;
+    margin-top: var(--spacing-xs);
+}
+
+.step-card.active .step-badge {
+    background: var(--color-primary) !important;
+}
+
+.step-card.completed .step-badge {
+    background: var(--color-success) !important;
+}
+
+.guide-box {
+    background: var(--color-surface);
+    border-left: 4px solid var(--color-primary);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    border-radius: var(--rounded-md);
+}
+
+.guide-box h4 {
+    margin: 0 0 var(--spacing-xs) 0;
+    font: var(--font-title-sm);
+    color: var(--color-ink);
+}
+
+.guide-box p {
+    margin: 0;
+    font: var(--font-body-sm);
+    color: var(--color-muted);
+}
+
 @media (max-width: 1024px) {
     .register-container {
         grid-template-columns: 1fr;
@@ -99,15 +169,15 @@
 
 {% block content %}
 <div class="card mb-lg">
-    <h2 class="card-title" style="margin: 0;">Registrasi Wajah</h2>
-    <p style="font: var(--font-body-sm); color: var(--color-muted); margin-top: var(--spacing-xs);">Daftarkan wajah Anda untuk sistem absensi</p>
+    <h2 class="card-title" style="margin: 0;">Registrasi Wajah Otomatis</h2>
+    <p style="font: var(--font-body-sm); color: var(--color-muted); margin-top: var(--spacing-xs);">Ikuti panduan arah wajah yang muncul di layar secara interaktif</p>
 </div>
 
 <div class="register-container">
     <div class="form-section">
-        <h3>Informasi Siswa</h3>
+        <h3>Informasi Karyawan</h3>
         <div class="form-group">
-            <label class="form-label">NIS</label>
+            <label class="form-label">NIP</label>
             <input type="text" class="form-input" value="{{ user.username }}" readonly>
         </div>
 
@@ -117,33 +187,58 @@
         </div>
 
         <div class="instruction" style="margin-top: var(--spacing-xl);">
-            <h4 style="font: var(--font-title-sm); color: var(--color-ink); margin-bottom: var(--spacing-sm);">Instruksi:</h4>
+            <h4>Cara Kerja Pemindaian:</h4>
             <ul style="font: var(--font-body-sm); color: var(--color-muted); line-height: 1.8; padding-left: var(--spacing-lg);">
-                <li>Pastikan wajah Anda terlihat jelas di kamera</li>
-                <li>Pastikan pencahayaan cukup</li>
-                <li>Hadapkan wajah langsung ke kamera</li>
-                <li>Sistem akan mengambil 30 foto secara otomatis</li>
-                <li>Setelah selesai, jalankan training model</li>
+                <li>Aktifkan kamera terlebih dahulu.</li>
+                <li>Tekan tombol <strong>"Mulai Pindai Wajah"</strong>.</li>
+                <li>Lihat kotak instruksi di sebelah kanan, dan arahkan wajah Anda sesuai petunjuk.</li>
+                <li>Sistem akan otomatis berpindah ke tahap berikutnya saat posisi wajah terdeteksi dengan benar.</li>
             </ul>
         </div>
     </div>
 
     <div class="camera-section">
         <h3>Pengambilan Sampel Wajah</h3>
-        <p class="instruction">Klik "Mulai Kamera" untuk memulai pengambilan foto wajah.</p>
+        <p class="instruction" id="cameraPrompt">Klik "Mulai Kamera" untuk mengaktifkan video feed.</p>
+
+        <!-- Guide Box -->
+        <div id="guideBox" class="guide-box" style="display: none;">
+            <h4 id="guideTitle">Instruksi Arah:</h4>
+            <p id="guideText">Menunggu pemindaian dimulai...</p>
+        </div>
+
+        <!-- Steps Progress Visualizer -->
+        <div class="steps-progress">
+            <div id="stepCard1" class="step-card">
+                <h4 style="margin: 0; font-size: 12px;">Fase 1</h4>
+                <p style="margin: 0; font-size: 10px; color: var(--color-muted);">Hadap Depan</p>
+                <span id="stepBadge1" class="step-badge">Belum</span>
+            </div>
+            <div id="stepCard2" class="step-card">
+                <h4 style="margin: 0; font-size: 12px;">Fase 2</h4>
+                <p style="margin: 0; font-size: 10px; color: var(--color-muted);">Kiri & Kanan</p>
+                <span id="stepBadge2" class="step-badge">Belum</span>
+            </div>
+            <div id="stepCard3" class="step-card">
+                <h4 style="margin: 0; font-size: 12px;">Fase 3</h4>
+                <p style="margin: 0; font-size: 10px; color: var(--color-muted);">Atas & Bawah</p>
+                <span id="stepBadge3" class="step-badge">Belum</span>
+            </div>
+        </div>
 
         <img id="videoFeed" src="" alt="Video Feed" style="display: none;">
 
         <div class="capture-info" id="captureInfo" style="display: none;">
-            <p>Status: <span id="captureStatus">Siap</span></p>
+            <p>Status: <span id="captureStatus">Kamera aktif</span></p>
             <div class="progress-bar">
                 <div id="progressBar" class="progress-fill"></div>
             </div>
         </div>
 
-        <div style="display: flex; gap: var(--spacing-sm);">
+        <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
             <button id="startCamera" class="btn btn-primary">Mulai Kamera</button>
-            <button id="startCapture" class="btn btn-success" style="display: none;">Ambil Foto (30x)</button>
+            <button id="startCaptureBtn" class="btn btn-success" style="display: none;">Mulai Pindai Wajah</button>
+            <a href="/user/do-attendance" id="testAttendanceBtn" class="btn btn-success" style="display: none; text-decoration: none; text-align: center; line-height: 2.2;">Coba Absensi Sekarang</a>
             <button id="stopCamera" class="btn btn-secondary" style="display: none;">Stop Kamera</button>
         </div>
 
@@ -156,6 +251,7 @@
 <script>
 let cameraActive = false;
 let capturing = false;
+let statusInterval = null;
 
 document.getElementById('startCamera').addEventListener('click', async function() {
     try {
@@ -168,17 +264,18 @@ document.getElementById('startCamera').addEventListener('click', async function(
         const result = await response.json();
 
         if (result.success) {
-            // Show video feed
             document.getElementById('videoFeed').src = '/video_feed';
             document.getElementById('videoFeed').style.display = 'block';
             document.getElementById('captureInfo').style.display = 'block';
+            document.getElementById('cameraPrompt').style.display = 'none';
+            document.getElementById('guideBox').style.display = 'block';
 
-            // Toggle buttons
             document.getElementById('startCamera').style.display = 'none';
-            document.getElementById('startCapture').style.display = 'inline-block';
+            document.getElementById('startCaptureBtn').style.display = 'inline-block';
             document.getElementById('stopCamera').style.display = 'inline-block';
 
             cameraActive = true;
+            resetStepsUI();
             showMessage('Kamera berhasil diaktifkan', 'success');
         } else {
             showMessage(result.message, 'error');
@@ -188,38 +285,163 @@ document.getElementById('startCamera').addEventListener('click', async function(
     }
 });
 
-document.getElementById('startCapture').addEventListener('click', async function() {
+function resetStepsUI() {
+    for (let i = 1; i <= 3; i++) {
+        document.getElementById('stepCard' + i).className = 'step-card';
+        document.getElementById('stepBadge' + i).textContent = 'Belum';
+    }
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('testAttendanceBtn').style.display = 'none';
+    document.getElementById('startCaptureBtn').style.display = 'inline-block';
+    document.getElementById('guideTitle').textContent = 'Instruksi Arah:';
+    document.getElementById('guideText').textContent = 'Klik tombol "Mulai Pindai Wajah" di bawah.';
+}
+
+document.getElementById('startCaptureBtn').addEventListener('click', async function() {
     if (capturing) return;
 
     capturing = true;
-    document.getElementById('startCapture').disabled = true;
-    document.getElementById('captureStatus').textContent = 'Mengambil foto...';
+    document.getElementById('startCaptureBtn').disabled = true;
+    document.getElementById('stopCamera').disabled = true;
+    resetStepsUI();
+
+    // Start status polling
+    startPollingProgress();
 
     try {
         const response = await fetch('/api/capture_samples', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                student_id: {{ user.student_id }}
+                employee_id: {{ user.employee_id | tojson }}
             })
         });
 
         const result = await response.json();
 
+        // Stop polling
+        clearInterval(statusInterval);
+
         if (result.success) {
+            // Set all step cards to completed
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById('stepCard' + i).className = 'step-card completed';
+                document.getElementById('stepBadge' + i).textContent = 'Sukses';
+            }
             document.getElementById('progressBar').style.width = '100%';
-            document.getElementById('captureStatus').textContent = 'Selesai!';
-            showMessage(result.message + ' - Silakan jalankan training model.', 'success');
+
+            // Train model
+            await runModelTraining();
         } else {
+            document.getElementById('guideTitle').textContent = 'Pindai Gagal';
+            document.getElementById('guideText').textContent = result.message;
             showMessage(result.message, 'error');
         }
     } catch (error) {
+        clearInterval(statusInterval);
         showMessage('Error: ' + error.message, 'error');
     } finally {
         capturing = false;
-        document.getElementById('startCapture').disabled = false;
+        document.getElementById('startCaptureBtn').disabled = false;
+        document.getElementById('stopCamera').disabled = false;
     }
 });
+
+function startPollingProgress() {
+    statusInterval = setInterval(async () => {
+        try {
+            const response = await fetch('/api/capture_status');
+            const data = await response.json();
+
+            if (data.running) {
+                // Update progress bar
+                const percent = (data.saved / data.total) * 100;
+                document.getElementById('progressBar').style.width = percent + '%';
+
+                document.getElementById('captureStatus').textContent = `Mendapatkan foto: ${data.saved} / ${data.total}`;
+
+                // Update guide instructions and active card
+                updateActivePhaseUI(data.phase, data.saved);
+            }
+        } catch (e) {
+            console.error('Error polling status:', e);
+        }
+    }, 250);
+}
+
+function updateActivePhaseUI(phase, saved) {
+    const card1 = document.getElementById('stepCard1');
+    const badge1 = document.getElementById('stepBadge1');
+    const card2 = document.getElementById('stepCard2');
+    const badge2 = document.getElementById('stepBadge2');
+    const card3 = document.getElementById('stepCard3');
+    const badge3 = document.getElementById('stepBadge3');
+
+    const guideTitle = document.getElementById('guideTitle');
+    const guideText = document.getElementById('guideText');
+
+    if (phase === 'depan') {
+        card1.className = 'step-card active';
+        badge1.textContent = 'Memindai...';
+        card2.className = 'step-card';
+        card3.className = 'step-card';
+
+        guideTitle.innerHTML = '<strong>Langkah 1: Hadap Depan</strong>';
+        guideText.innerHTML = 'Tatap kamera lurus ke depan secara tegak. Jaga posisi Anda.';
+    } else if (phase === 'kiri_kanan') {
+        card1.className = 'step-card completed';
+        badge1.textContent = 'Sukses';
+        card2.className = 'step-card active';
+        badge2.textContent = 'Memindai...';
+        card3.className = 'step-card';
+
+        guideTitle.innerHTML = '<strong>Langkah 2: Toleh Kiri & Kanan</strong>';
+        guideText.innerHTML = 'Tolehkan kepala ke kiri dan ke kanan perlahan secara bergantian.';
+    } else if (phase === 'atas_bawah') {
+        card1.className = 'step-card completed';
+        badge1.textContent = 'Sukses';
+        card2.className = 'step-card completed';
+        badge2.textContent = 'Sukses';
+        card3.className = 'step-card active';
+        badge3.textContent = 'Memindai...';
+
+        guideTitle.innerHTML = '<strong>Langkah 3: Dongak Atas & Bawah</strong>';
+        guideText.innerHTML = 'Dongakkan kepala ke atas dan tunduk ke bawah secara perlahan.';
+    }
+}
+
+async function runModelTraining() {
+    document.getElementById('guideTitle').textContent = 'Pelatihan Model';
+    document.getElementById('guideText').textContent = 'Sedang melatih kecerdasan buatan dengan dataset wajah baru Anda...';
+    document.getElementById('captureStatus').textContent = 'Melatih kecerdasan buatan (training)...';
+
+    document.getElementById('startCaptureBtn').style.display = 'none';
+
+    try {
+        const response = await fetch('/api/train', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById('guideTitle').textContent = 'Selesai!';
+            document.getElementById('guideText').textContent = 'Model berhasil dilatih. Anda siap melakukan absensi.';
+            document.getElementById('captureStatus').textContent = 'Registrasi Wajah Sukses 100%';
+            showMessage('Selamat! Registrasi wajah sukses dan model berhasil dilatih!', 'success');
+            document.getElementById('testAttendanceBtn').style.display = 'inline-block';
+        } else {
+            document.getElementById('guideTitle').textContent = 'Training Gagal';
+            document.getElementById('guideText').textContent = result.message;
+            document.getElementById('startCaptureBtn').style.display = 'inline-block';
+        }
+    } catch (error) {
+        document.getElementById('guideTitle').textContent = 'Training Error';
+        document.getElementById('guideText').textContent = error.message;
+        document.getElementById('startCaptureBtn').style.display = 'inline-block';
+    }
+}
 
 document.getElementById('stopCamera').addEventListener('click', async function() {
     try {
@@ -232,15 +454,16 @@ document.getElementById('stopCamera').addEventListener('click', async function()
         const result = await response.json();
 
         if (result.success) {
-            // Hide video feed
             document.getElementById('videoFeed').style.display = 'none';
             document.getElementById('videoFeed').src = '';
             document.getElementById('captureInfo').style.display = 'none';
+            document.getElementById('cameraPrompt').style.display = 'block';
+            document.getElementById('guideBox').style.display = 'none';
 
-            // Toggle buttons
             document.getElementById('startCamera').style.display = 'inline-block';
-            document.getElementById('startCapture').style.display = 'none';
+            document.getElementById('startCaptureBtn').style.display = 'none';
             document.getElementById('stopCamera').style.display = 'none';
+            document.getElementById('testAttendanceBtn').style.display = 'none';
 
             cameraActive = false;
             showMessage('Kamera dimatikan', 'success');
@@ -258,7 +481,7 @@ function showMessage(message, type) {
 
     setTimeout(() => {
         messageEl.style.display = 'none';
-    }, 5000);
+    }, 6000);
 }
 </script>
 {% endblock %}

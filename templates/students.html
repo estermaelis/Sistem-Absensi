@@ -1,44 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %}Data Siswa - Sistem Absensi{% endblock %}
+{% block title %}Data Karyawan - Attendify{% endblock %}
 
 {% block content %}
-<div class="students-page">
-    <div class="page-header">
-        <h2>Data Siswa</h2>
+<div class="card">
+    <div class="card-header">Data Karyawan</div>
+    <div class="card-body">
+        {% if employees %}
+        <div style="overflow-x: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>NIP</th>
+                        <th>Nama</th>
+                        <th>Departemen</th>
+                        <th>Jenis Kelamin</th>
+                        <th>Status</th>
+                        <th>Tanggal Daftar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                    <tr>
+                        <td>{{ employee.nip }}</td>
+                        <td>{{ employee.name }}</td>
+                        <td>{{ employee.department_name or '-' }}</td>
+                        <td>{{ 'Laki-laki' if employee.gender == 'L' else 'Perempuan' }}</td>
+                        <td>
+                            <span class="badge {{ 'badge-success' if employee.is_active else 'badge-muted' }}">
+                                {{ 'Aktif' if employee.is_active else 'Nonaktif' }}
+                            </span>
+                        </td>
+                        <td>{{ employee.created_at.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="text-align: center; color: var(--color-secondary); padding: var(--spacing-xl);">Belum ada data karyawan</p>
+        {% endif %}
     </div>
-
-    {% if students %}
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>NIS</th>
-                <th>Nama</th>
-                <th>Kelas</th>
-                <th>Jenis Kelamin</th>
-                <th>Status</th>
-                <th>Tanggal Daftar</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for student in students %}
-            <tr>
-                <td>{{ student.nis }}</td>
-                <td>{{ student.name }}</td>
-                <td>{{ student.class_name or '-' }}</td>
-                <td>{{ 'Laki-laki' if student.gender == 'L' else 'Perempuan' }}</td>
-                <td>
-                    <span class="badge badge-{{ 'success' if student.is_active else 'secondary' }}">
-                        {{ 'Aktif' if student.is_active else 'Nonaktif' }}
-                    </span>
-                </td>
-                <td>{{ student.created_at.strftime('%Y-%m-%d') }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p class="no-data">Belum ada data siswa</p>
-    {% endif %}
 </div>
 {% endblock %}

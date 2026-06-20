@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Absensi - Attendify{% endblock %}
+
+{% block extra_css %}
+<style>
+.attendance-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
+}
+
+.camera-section, .info-section {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: var(--spacing-xl);
+}
+
+#videoFeed {
+    width: 100%;
+    max-width: 640px;
+    height: auto;
+    background: #111;
+    border-radius: 0.5rem;
+    margin-bottom: var(--spacing-lg);
+}
+
+.status-card {
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.status-card h4 {
+    font-size: 0.875rem;
+    color: var(--color-secondary);
+    margin: 0 0 var(--spacing-xs) 0;
+}
+
+.status-card .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.instruction {
+    font-size: 0.875rem;
+    color: var(--color-secondary);
+    line-height: 1.8;
+    margin-bottom: var(--spacing-lg);
+}
+
+.message {
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    display: none;
+}
+
+.message.success { background: #d4e9e2; color: #0d4e35; }
+.message.error { background: #fbe6e4; color: #8a160e; }
+.message.info { background: #edebe9; color: #1E3932; }
+
+@media (max-width: 1024px) {
+    .attendance-container { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">Absensi Face Recognition</div>
+    <div class="card-body">
+        <p class="instruction" style="margin: 0;">Aktifkan kamera, hadapkan wajah ke kamera, lalu klik "Absen Sekarang". Sistem akan otomatis mengenali wajah dan mencatat kehadiran.</p>
+    </div>
+</div>
+
+<div class="attendance-container">
+    <div class="camera-section">
+        <h3 style="margin-top: 0;">Kamera</h3>
+
+        <img id="videoFeed" src="" alt="Video Feed" style="display: none;">
+
+        <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+            <button id="startCamera" class="btn btn-primary">Mulai Kamera</button>
+            <button id="doAttendance" class="btn btn-success" style="display: none;">Absen Sekarang</button>
+            <button id="stopCamera" class="btn btn-secondary" style="display: none;">Stop Kamera</button>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <div class="info-section">
+        <h3 style="margin-top: 0;">Informasi</h3>
+
+        <div class="status-card">
+            <h4>Status Kamera</h4>
+            <p class="value" id="cameraStatus">Tidak Aktif</p>
+        </div>
+
+        <div class="status-card">
+            <h4>Tanggal</h4>
+            <p class="value" id="currentDate">-</p>
+        </div>
+
+        <div class="status-card">
+            <h4>Waktu</h4>
+            <p class="value" id="currentTime">-</p>
+        </div>
+
+        <div class="status-card" id="resultCard" style="display: none;">
+            <h4>Absensi Terakhir</h4>
+            <p class="value" id="resultName">-</p>
+            <p style="font-size: 0.875rem; color: var(--color-secondary); margin: var(--spacing-xs) 0 0 0;">
+                Status: <span id="resultStatus">-</span>
+            </p>
+        </div>
+
+        <div class="instruction" style="margin-top: var(--spacing-lg);">
+            <strong>Instruksi:</strong>
+            <ul style="padding-left: var(--spacing-lg); margin-top: var(--spacing-xs);">
+                <li>Pastikan wajah terlihat jelas</li>
+                <li>Pastikan pencahayaan cukup</li>
+                <li>Hadapkan wajah langsung ke kamera</li>
+                <li>Belum terdaftar? <a href="{{ url_for('register') }}">Registrasi wajah</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let attendanceProcessing = false;
+
+function updateDateTime() {
+    const now = new Date();
+    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', dateOptions);
+    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    document.getElementById('currentTime').textContent = now.toLocaleTimeString('id-ID', timeOptions);
+}
+updateDateTime();
+setInterval(updateDateTime, 1000);
+
+document.getElementById('startCamera').addEventListener('click', async function() {
+    try {
+        const response = await fetch('/api/start_camera', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({})
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById('videoFeed').src = '/video_feed';
+            document.getElementById('videoFeed').style.display = 'block';
+            document.getElementById('cameraStatus').textContent = 'Aktif';
+            document.getElementById('startCamera').style.display = 'none';
+            document.getElementById('doAttendance').style.display = 'inline-block';
+            document.getElementById('stopCamera').style.display = 'inline-block';
+            showMessage('Kamera berhasil diaktifkan', 'success');
+        } else {
+            showMessage(result.message, 'error');
+        }
+    } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+    }
+});
+
+document.getElementById('doAttendance').addEventListener('click', async function() {
+    if (attendanceProcessing) return;
+    attendanceProcessing = true;
+    const btn = document.getElementById('doAttendance');
+    btn.disabled = true;
+    btn.textContent = 'Memproses...';
+
+    try {
+        const response = await fetch('/api/recognize', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({})
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            showMessage(result.message + ' - ' + result.employee.name, 'success');
+            document.getElementById('resultCard').style.display = 'block';
+            document.getElementById('resultName').textContent = result.employee.name;
+            document.getElementById('resultStatus').textContent = result.status;
+        } else {
+            showMessage(result.message, 'error');
+        }
+    } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+    } finally {
+        attendanceProcessing = false;
+        btn.disabled = false;
+        btn.textContent = 'Absen Sekarang';
+    }
+});
+
+document.getElementById('stopCamera').addEventListener('click', async function() {
+    try {
+        const response = await fetch('/api/stop_camera', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({})
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById('videoFeed').style.display = 'none';
+            document.getElementById('videoFeed').src = '';
+            document.getElementById('cameraStatus').textContent = 'Tidak Aktif';
+            document.getElementById('startCamera').style.display = 'inline-block';
+            document.getElementById('doAttendance').style.display = 'none';
+            document.getElementById('stopCamera').style.display = 'none';
+            showMessage('Kamera dimatikan', 'success');
+        }
+    } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+    }
+});
+
+function showMessage(message, type) {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = message;
+    messageEl.className = 'message ' + type;
+    messageEl.style.display = 'block';
+    setTimeout(() => { messageEl.style.display = 'none'; }, 5000);
+}
+</script>
+{% endblock %}

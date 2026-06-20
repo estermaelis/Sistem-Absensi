@@ -6,30 +6,41 @@
     <title>{% block title %}Sistem Absensi{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bmw-design.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <div class="top-nav">
-        <div class="nav-brand">Sistem Absensi Face Recognition</div>
-        <div class="nav-menu">
-            <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
-            <a href="{{ url_for('students') }}" class="nav-link">Data Siswa</a>
-            <a href="{{ url_for('train') }}" class="nav-link">Training</a>
-            <a href="{{ url_for('attendance') }}" class="nav-link">Absensi</a>
+    <nav class="top-nav">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">Attendify<sup>®</sup></a>
+            <div class="nav-menu">
+                <a href="{{ url_for('index') }}" class="nav-link">Absensi</a>
+                <a href="{{ url_for('register') }}" class="nav-link">Registrasi Wajah</a>
+                <a href="{{ url_for('students') }}" class="nav-link">Data Karyawan</a>
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">Login</a>
+            </div>
         </div>
-    </div>
+    </nav>
 
-    <main style="padding: var(--spacing-xl); background: var(--color-surface-soft); min-height: calc(100vh - var(--height-nav));">
-        <div class="container">
+    <main style="padding: var(--spacing-2xl) 0; min-height: calc(100vh - 200px);">
+        <div class="container animate-slide-up">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
             {% block content %}{% endblock %}
         </div>
     </main>
 
-    <footer style="background: var(--color-surface-soft); padding: var(--spacing-lg); text-align: center; border-top: 1px solid var(--color-hairline);">
+    <footer style="background-color: var(--color-surface-dark); padding: var(--spacing-xl); text-align: center;">
         <div class="container">
-            <p style="font: var(--font-body-sm); color: var(--color-muted); margin: 0;">&copy; 2026 Sistem Absensi Face Recognition</p>
+            <p style="font: var(--font-body-sm); color: var(--color-on-dark-soft); margin: 0;">
+                &copy; 2026 Attendify &middot; Powered by Face Recognition Technology
+            </p>
         </div>
     </footer>
 

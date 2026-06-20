@@ -69,29 +69,41 @@ def create_tables():
     try:
         cursor = connection.cursor()
 
-        # Create students table
+        # Create departments table
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS students (
+            CREATE TABLE IF NOT EXISTS departments (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                nis VARCHAR(30) UNIQUE NOT NULL,
+                name VARCHAR(100) UNIQUE NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        print("Table 'departments' created successfully.")
+
+        # Create employees table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS employees (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nip VARCHAR(30) UNIQUE NOT NULL,
                 name VARCHAR(100) NOT NULL,
-                class_name VARCHAR(50),
+                department_id INT DEFAULT NULL,
+                email VARCHAR(120) DEFAULT NULL,
                 gender ENUM('L', 'P') NOT NULL,
                 is_active TINYINT(1) DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
             )
         """)
-        print("Table 'students' created successfully.")
+        print("Table 'employees' created successfully.")
 
         # Create face_samples table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS face_samples (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                student_id INT NOT NULL,
+                employee_id INT NOT NULL,
                 image_path VARCHAR(255) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+                FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
             )
         """)
         print("Table 'face_samples' created successfully.")
@@ -100,17 +112,31 @@ def create_tables():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS attendance (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                student_id INT NOT NULL,
+                employee_id INT NOT NULL,
                 attendance_date DATE NOT NULL,
                 check_in_time TIME NOT NULL,
+                check_out_time TIME DEFAULT NULL,
                 status ENUM('Hadir', 'Terlambat') NOT NULL,
                 confidence DECIMAL(8,2),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
-                UNIQUE KEY unique_attendance (student_id, attendance_date)
+                FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+                UNIQUE KEY unique_attendance (employee_id, attendance_date)
             )
         """)
         print("Table 'attendance' created successfully.")
+
+        # Create activity_logs table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS activity_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT DEFAULT NULL,
+                username VARCHAR(50) DEFAULT NULL,
+                action VARCHAR(100) NOT NULL,
+                detail VARCHAR(255) DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        print("Table 'activity_logs' created successfully.")
 
         connection.commit()
         cursor.close()

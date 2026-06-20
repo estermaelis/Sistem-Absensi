@@ -7,51 +7,61 @@
 {% block content %}
 <div class="card">
     <h2 class="card-title">Jenis Laporan</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-        <div style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 15px;">📅</div>
-            <h3 style="margin: 0 0 10px; color: #2c3e50;">Laporan Harian</h3>
-            <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 15px;">Lihat absensi per tanggal tertentu</p>
-            <form method="GET" action="{{ url_for('admin_users.daily_report') }}" style="margin-bottom: 10px;">
-                <input type="date" name="date" value="{{ today }}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px;">
-                <button type="submit" style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    Lihat Laporan
-                </button>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+        <div class="card-soft p-lg text-center">
+            <h3 class="mb-sm">Laporan Harian</h3>
+            <p class="text-muted mb-md" style="font: var(--font-body-sm);">Lihat absensi per tanggal tertentu</p>
+            <form method="GET" action="{{ url_for('admin_users.daily_report') }}">
+                <input type="date" name="date" value="{{ today }}" required class="form-input mb-sm">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Lihat Laporan</button>
             </form>
         </div>
 
-        <div style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 15px;">📊</div>
-            <h3 style="margin: 0 0 10px; color: #2c3e50;">Statistik Kehadiran</h3>
-            <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 15px;">Lihat statistik keseluruhan dan bulanan</p>
-            <a href="{{ url_for('admin_users.statistics') }}" style="display: block; width: 100%; padding: 10px; background: #27ae60; color: white; border-radius: 4px; text-decoration: none;">
-                Lihat Statistik
-            </a>
+        <div class="card-soft p-lg text-center">
+            <h3 class="mb-sm">Statistik Kehadiran</h3>
+            <p class="text-muted mb-md" style="font: var(--font-body-sm);">Lihat statistik keseluruhan dan bulanan</p>
+            <a href="{{ url_for('admin_users.statistics') }}" class="btn btn-secondary" style="width: 100%;">Lihat Statistik</a>
         </div>
 
-        <div style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 15px;">📥</div>
-            <h3 style="margin: 0 0 10px; color: #2c3e50;">Export ke CSV</h3>
-            <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 15px;">Download laporan dalam format CSV</p>
-            <p style="color: #95a5a6; font-size: 13px;">Fitur akan segera tersedia</p>
+        <div class="card-soft p-lg text-center">
+            <h3 class="mb-sm">Export Laporan</h3>
+            <p class="text-muted mb-md" style="font: var(--font-body-sm);">Download laporan absensi (kosongkan tanggal untuk semua data)</p>
+            <div class="flex flex-col gap-sm mb-md">
+                <input type="date" id="exportStart" class="form-input">
+                <input type="date" id="exportEnd" class="form-input">
+            </div>
+            <div class="flex gap-sm">
+                <button onclick="exportReport('csv')" class="btn btn-success" style="flex: 1; min-width: 0;">CSV</button>
+                <button onclick="exportReport('excel')" class="btn btn-secondary" style="flex: 1; min-width: 0;">Excel</button>
+                <button onclick="exportReport('pdf')" class="btn btn-error" style="flex: 1; min-width: 0;">PDF</button>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="card" style="margin-top: 20px;">
+<div class="card mt-lg">
     <h2 class="card-title">Laporan Cepat - Hari Ini</h2>
     <div id="todayReport">
-        <p style="text-align: center; color: #7f8c8d;">Loading...</p>
+        <p class="text-center text-muted">Loading...</p>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+function exportReport(fmt) {
+    const start = document.getElementById('exportStart').value;
+    const end = document.getElementById('exportEnd').value;
+    const params = new URLSearchParams();
+    if (start) params.append('start_date', start);
+    if (end) params.append('end_date', end);
+    window.location.href = `/admin/reports/export/${fmt}?` + params.toString();
+}
+
 // Set today's date
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
-    const dateInputs = document.querySelectorAll('input[type="date"]');
+    const dateInputs = document.querySelectorAll('input[type="date"][name="date"]');
     dateInputs.forEach(input => {
         if (!input.value) {
             input.value = today;
@@ -68,32 +78,34 @@ function loadTodayReport() {
         .then(data => {
             const container = document.getElementById('todayReport');
             if (data.success && data.data.length > 0) {
-                let html = '<table style="width: 100%; border-collapse: collapse;">';
-                html += '<thead><tr style="background: #ecf0f1;">';
-                html += '<th style="padding: 10px; text-align: left; border-bottom: 2px solid #bdc3c7;">NIS</th>';
-                html += '<th style="padding: 10px; text-align: left; border-bottom: 2px solid #bdc3c7;">Nama</th>';
-                html += '<th style="padding: 10px; text-align: left; border-bottom: 2px solid #bdc3c7;">Jam Masuk</th>';
-                html += '<th style="padding: 10px; text-align: left; border-bottom: 2px solid #bdc3c7;">Status</th>';
+                let html = '<div class="table-container"><table class="table">';
+                html += '<thead><tr>';
+                html += '<th>NIP</th>';
+                html += '<th>Nama</th>';
+                html += '<th>Jam Masuk</th>';
+                html += '<th>Jam Pulang</th>';
+                html += '<th>Status</th>';
                 html += '</tr></thead><tbody>';
 
                 data.data.forEach(record => {
-                    html += '<tr style="border-bottom: 1px solid #ecf0f1;">';
-                    html += `<td style="padding: 10px;">${record.nis}</td>`;
-                    html += `<td style="padding: 10px;">${record.name}</td>`;
-                    html += `<td style="padding: 10px;">${record.check_in_time}</td>`;
-                    html += `<td style="padding: 10px;"><span style="padding: 4px 12px; border-radius: 12px; font-size: 12px; ${record.status === 'Hadir' ? 'background: #d4edda; color: #155724;' : 'background: #fff3cd; color: #856404;'}">${record.status}</span></td>`;
+                    html += '<tr>';
+                    html += `<td>${record.nip}</td>`;
+                    html += `<td>${record.name}</td>`;
+                    html += `<td>${record.check_in_time || '-'}</td>`;
+                    html += `<td>${record.check_out_time || '-'}</td>`;
+                    html += `<td><span class="badge ${record.status === 'Hadir' ? 'badge-success' : 'badge-warning'}">${record.status}</span></td>`;
                     html += '</tr>';
                 });
 
-                html += '</tbody></table>';
-                html += `<p style="margin-top: 15px; color: #7f8c8d; font-size: 14px;">Total: ${data.data.length} siswa hadir hari ini</p>`;
+                html += '</tbody></table></div>';
+                html += `<p class="mt-md text-muted" style="font: var(--font-body-sm);">Total: ${data.data.length} karyawan hadir hari ini</p>`;
                 container.innerHTML = html;
             } else {
-                container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">Belum ada absensi hari ini</p>';
+                container.innerHTML = '<p class="text-center text-muted">Belum ada absensi hari ini</p>';
             }
         })
         .catch(error => {
-            document.getElementById('todayReport').innerHTML = '<p style="text-align: center; color: #e74c3c;">Error loading data</p>';
+            document.getElementById('todayReport').innerHTML = '<p class="text-center text-error">Error loading data</p>';
         });
 }
 </script>

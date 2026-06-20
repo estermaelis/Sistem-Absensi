@@ -6,7 +6,7 @@
     <title>{% block title %}Admin Dashboard{% endblock %} - Sistem Absensi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bmw-design.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <div style="display: flex;">
+    <div class="app-shell">
         <aside class="sidebar">
             <ul class="sidebar-menu">
                 <li class="sidebar-menu-item">
@@ -29,7 +29,12 @@
                 </li>
                 <li class="sidebar-menu-item">
                     <a href="{{ url_for('admin.students') }}" class="sidebar-menu-link {% if request.endpoint == 'admin.students' %}active{% endif %}">
-                        Kelola Siswa
+                        Kelola Karyawan
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('departments.index') }}" class="sidebar-menu-link {% if request.endpoint == 'departments.index' %}active{% endif %}">
+                        Kelola Departemen
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
@@ -45,6 +50,11 @@
                 <li class="sidebar-menu-item">
                     <a href="{{ url_for('admin_users.statistics') }}" class="sidebar-menu-link {% if request.endpoint == 'admin_users.statistics' %}active{% endif %}">
                         Statistik
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="{{ url_for('admin_users.activity_log') }}" class="sidebar-menu-link {% if request.endpoint == 'admin_users.activity_log' %}active{% endif %}">
+                        Log Aktivitas
                     </a>
                 </li>
             </ul>

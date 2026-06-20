@@ -5,42 +5,47 @@
 {% block breadcrumb %}Home / Profil{% endblock %}
 
 {% block content %}
-{% if student %}
-<div class="card">
+{% if employee %}
+<div class="card mb-lg">
     <h2 class="card-title">Informasi Pribadi</h2>
     <div style="max-width: 600px;">
-        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
-            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">NIS/ID</div>
-            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ student.nis }}</div>
+        <div class="profile-row">
+            <div class="profile-label">NIP</div>
+            <div class="profile-value">{{ employee.nip }}</div>
         </div>
 
-        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
-            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Nama Lengkap</div>
-            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ student.name }}</div>
+        <div class="profile-row">
+            <div class="profile-label">Nama Lengkap</div>
+            <div class="profile-value">{{ employee.name }}</div>
         </div>
 
-        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
-            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Kelas/Divisi</div>
-            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ student.class_name or '-' }}</div>
+        <div class="profile-row">
+            <div class="profile-label">Departemen</div>
+            <div class="profile-value">{{ employee.department_name or '-' }}</div>
         </div>
 
-        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
-            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Jenis Kelamin</div>
-            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ 'Laki-laki' if student.gender == 'L' else 'Perempuan' }}</div>
+        <div class="profile-row">
+            <div class="profile-label">Email</div>
+            <div class="profile-value">{{ employee.email or '-' }}</div>
         </div>
 
-        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
-            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Status</div>
-            <div style="font-size: 18px; font-weight: bold;">
-                <span style="padding: 6px 16px; border-radius: 12px; {% if student.is_active %}background: #d4edda; color: #155724;{% else %}background: #f8d7da; color: #721c24;{% endif %}">
-                    {{ 'Aktif' if student.is_active else 'Nonaktif' }}
+        <div class="profile-row">
+            <div class="profile-label">Jenis Kelamin</div>
+            <div class="profile-value">{{ 'Laki-laki' if employee.gender == 'L' else 'Perempuan' }}</div>
+        </div>
+
+        <div class="profile-row">
+            <div class="profile-label">Status</div>
+            <div>
+                <span class="badge {{ 'badge-success' if employee.is_active else 'badge-error' }}">
+                    {{ 'Aktif' if employee.is_active else 'Nonaktif' }}
                 </span>
             </div>
         </div>
 
-        <div style="margin-bottom: 20px;">
-            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Terdaftar Sejak</div>
-            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ student.created_at.strftime('%d %B %Y') }}</div>
+        <div class="profile-row" style="border-bottom: none;">
+            <div class="profile-label">Terdaftar Sejak</div>
+            <div class="profile-value">{{ employee.created_at.strftime('%d %B %Y') }}</div>
         </div>
     </div>
 </div>
@@ -48,30 +53,27 @@
 <div class="card">
     <h2 class="card-title">Informasi Akun</h2>
     <div style="max-width: 600px;">
-        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ecf0f1;">
-            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Username</div>
-            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ user.username }}</div>
+        <div class="profile-row">
+            <div class="profile-label">Username</div>
+            <div class="profile-value">{{ user.username }}</div>
         </div>
 
-        <div style="margin-bottom: 20px;">
-            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">Nama Lengkap</div>
-            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">{{ user.full_name }}</div>
+        <div class="profile-row" style="border-bottom: none;">
+            <div class="profile-label">Nama Lengkap</div>
+            <div class="profile-value">{{ user.full_name }}</div>
         </div>
 
-        <div style="margin-top: 30px;">
-            <a href="{{ url_for('user.change_password_page') }}" style="display: inline-block; padding: 12px 24px; background: #3498db; color: white; border-radius: 5px; text-decoration: none; font-weight: 500;">
-                🔑 Ganti Password
-            </a>
+        <div class="mt-lg">
+            <a href="{{ url_for('user.change_password_page') }}" class="btn btn-primary">Ganti Password</a>
         </div>
     </div>
 </div>
 
 {% else %}
 <div class="card">
-    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-        <div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
-        <h2 style="color: #e74c3c; margin-bottom: 10px;">Akun Tidak Terhubung</h2>
-        <p>Akun Anda belum terhubung dengan data siswa/karyawan.</p>
+    <div class="text-center text-muted" style="padding: var(--spacing-xxl);">
+        <h2 class="text-error mb-sm">Akun Tidak Terhubung</h2>
+        <p>Akun Anda belum terhubung dengan data karyawan.</p>
         <p>Silakan hubungi administrator untuk menghubungkan akun Anda.</p>
     </div>
 </div>

@@ -5,15 +5,15 @@ from src.database import get_db_connection
 from mysql.connector import Error
 
 def register_student():
-    """Register new student and capture face samples"""
+    """Register new employee and capture face samples"""
     print("=" * 50)
-    print("REGISTRASI SISWA/KARYAWAN")
+    print("REGISTRASI KARYAWAN")
     print("=" * 50)
 
-    # Input student data
-    nis = input("Masukkan NIS: ").strip()
-    if not nis:
-        print("NIS tidak boleh kosong!")
+    # Input employee data
+    nip = input("Masukkan NIP: ").strip()
+    if not nip:
+        print("NIP tidak boleh kosong!")
         return
 
     name = input("Masukkan Nama: ").strip()
@@ -21,7 +21,7 @@ def register_student():
         print("Nama tidak boleh kosong!")
         return
 
-    class_name = input("Masukkan Kelas/Divisi: ").strip()
+    department = input("Masukkan Departemen/Divisi: ").strip()
 
     gender = input("Jenis Kelamin (L/P): ").strip().upper()
     while gender not in ['L', 'P']:
@@ -37,24 +37,35 @@ def register_student():
     try:
         cursor = connection.cursor()
 
-        # Check if NIS already exists
-        cursor.execute("SELECT id FROM students WHERE nis = %s", (nis,))
+        # Check if NIP already exists
+        cursor.execute("SELECT id FROM employees WHERE nip = %s", (nip,))
         if cursor.fetchone():
-            print(f"NIS {nis} sudah terdaftar!")
+            print(f"NIP {nip} sudah terdaftar!")
             cursor.close()
             connection.close()
             return
 
-        # Insert student data
+        # Resolve department -> department_id (create if needed)
+        department_id = None
+        if department:
+            cursor.execute("SELECT id FROM departments WHERE name = %s", (department,))
+            row = cursor.fetchone()
+            if row:
+                department_id = row[0]
+            else:
+                cursor.execute("INSERT INTO departments (name) VALUES (%s)", (department,))
+                department_id = cursor.lastrowid
+
+        # Insert employee data
         insert_query = """
-            INSERT INTO students (nis, name, class_name, gender)
+            INSERT INTO employees (nip, name, department_id, gender)
             VALUES (%s, %s, %s, %s)
         """
-        cursor.execute(insert_query, (nis, name, class_name, gender))
+        cursor.execute(insert_query, (nip, name, department_id, gender))
         connection.commit()
-        student_id = cursor.lastrowid
+        employee_id = cursor.lastrowid
 
-        print(f"\nData siswa berhasil disimpan dengan ID: {student_id}")
+        print(f"\nData karyawan berhasil disimpan dengan ID: {employee_id}")
         print("\nMemulai pengambilan sampel wajah...")
         print("Instruksi:")
         print("- Hadapkan wajah ke kamera")
@@ -63,17 +74,17 @@ def register_student():
         print("- Tekan 'q' untuk membatalkan")
 
         # Capture face samples
-        samples_captured = capture_face_samples(student_id, cursor, connection)
+        samples_captured = capture_face_samples(employee_id, cursor, connection)
 
         if samples_captured > 0:
             print(f"\n{samples_captured} sampel wajah berhasil disimpan!")
             print("Silakan jalankan training model: python -m src.train_model")
         else:
             print("\nGagal mengambil sampel wajah!")
-            # Delete student data if no samples captured
-            cursor.execute("DELETE FROM students WHERE id = %s", (student_id,))
+            # Delete employee data if no samples captured
+            cursor.execute("DELETE FROM employees WHERE id = %s", (employee_id,))
             connection.commit()
-            print("Data siswa dihapus karena tidak ada sampel wajah.")
+            print("Data karyawan dihapus karena tidak ada sampel wajah.")
 
         cursor.close()
         connection.close()
@@ -83,7 +94,7 @@ def register_student():
         if connection:
             connection.close()
 
-def capture_face_samples(student_id, cursor, connection):
+def capture_face_samples(employee_id, cursor, connection):
     """Capture face samples using webcam"""
     # Load face cascade classifier
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -95,8 +106,8 @@ def capture_face_samples(student_id, cursor, connection):
         print("Error: Tidak dapat membuka kamera!")
         return 0
 
-    # Create directory for student samples
-    dataset_path = os.path.join('dataset', str(student_id))
+    # Create directory for employee samples
+    dataset_path = os.path.join('dataset', str(employee_id))
     os.makedirs(dataset_path, exist_ok=True)
 
     sample_count = 0
@@ -129,6 +140,7 @@ def capture_face_samples(student_id, cursor, connection):
             # Save face sample
             sample_count += 1
             face_img = gray[y:y+h, x:x+w]
+            face_img = cv2.resize(face_img, (150, 150))
 
             # Generate filename
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -141,10 +153,10 @@ def capture_face_samples(student_id, cursor, connection):
             # Save to database
             try:
                 insert_query = """
-                    INSERT INTO face_samples (student_id, image_path)
+                    INSERT INTO face_samples (employee_id, image_path)
                     VALUES (%s, %s)
                 """
-                cursor.execute(insert_query, (student_id, filepath))
+                cursor.execute(insert_query, (employee_id, filepath))
                 connection.commit()
             except Error as e:
                 print(f"Error saving sample to database: {e}")

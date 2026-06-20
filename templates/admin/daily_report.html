@@ -6,41 +6,43 @@
 
 {% block content %}
 <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div class="flex justify-between items-center mb-lg" style="flex-wrap: wrap; gap: var(--spacing-md);">
         <h2 class="card-title" style="margin: 0;">Laporan Tanggal: {{ report_date }}</h2>
-        <form method="GET" action="{{ url_for('admin_users.daily_report') }}" style="display: flex; gap: 10px;">
-            <input type="date" name="date" value="{{ report_date }}" required style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px;">
-            <button type="submit" style="padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">🔍 Lihat</button>
-            <a href="{{ url_for('admin_users.reports') }}" style="padding: 8px 16px; background: #95a5a6; color: white; border-radius: 5px; text-decoration: none;">← Kembali</a>
+        <form method="GET" action="{{ url_for('admin_users.daily_report') }}" class="flex gap-sm items-center">
+            <input type="date" name="date" value="{{ report_date }}" required class="form-input" style="width: auto;">
+            <button type="submit" class="btn btn-primary btn-sm">Lihat</button>
+            <a href="{{ url_for('admin_users.reports') }}" class="btn btn-secondary btn-sm">Kembali</a>
         </form>
     </div>
 
     {% if records %}
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse;">
+    <div class="table-container">
+        <table class="table">
             <thead>
-                <tr style="background: #ecf0f1;">
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">NIS</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Nama</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Kelas</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Jam Masuk</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Status</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Confidence</th>
+                <tr>
+                    <th>NIP</th>
+                    <th>Nama</th>
+                    <th>Departemen</th>
+                    <th>Jam Masuk</th>
+                    <th>Jam Pulang</th>
+                    <th>Status</th>
+                    <th>Confidence</th>
                 </tr>
             </thead>
             <tbody>
                 {% for record in records %}
-                <tr style="border-bottom: 1px solid #ecf0f1;">
-                    <td style="padding: 12px;">{{ record.nis }}</td>
-                    <td style="padding: 12px;"><strong>{{ record.name }}</strong></td>
-                    <td style="padding: 12px;">{{ record.class_name or '-' }}</td>
-                    <td style="padding: 12px;">{{ record.check_in_time }}</td>
-                    <td style="padding: 12px;">
-                        <span style="padding: 4px 12px; border-radius: 12px; font-size: 12px; {% if record.status == 'Hadir' %}background: #d4edda; color: #155724;{% else %}background: #fff3cd; color: #856404;{% endif %}">
+                <tr>
+                    <td>{{ record.nip }}</td>
+                    <td><strong>{{ record.name }}</strong></td>
+                    <td>{{ record.department_name or '-' }}</td>
+                    <td>{{ record.check_in_time }}</td>
+                    <td>{{ record.check_out_time or '-' }}</td>
+                    <td>
+                        <span class="badge {% if record.status == 'Hadir' %}badge-success{% else %}badge-warning{% endif %}">
                             {{ record.status }}
                         </span>
                     </td>
-                    <td style="padding: 12px;">
+                    <td>
                         {% if record.confidence %}
                             {{ "%.2f"|format(record.confidence) }}%
                         {% else %}
@@ -53,25 +55,24 @@
         </table>
     </div>
 
-    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+    <div class="card-soft mt-lg p-md">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--spacing-md);">
             <div>
-                <div style="color: #7f8c8d; font-size: 13px;">Total Hadir</div>
-                <div style="font-size: 24px; font-weight: bold; color: #2c3e50;">{{ records|length }}</div>
+                <div class="text-uppercase text-muted" style="font: var(--font-caption);">Total Hadir</div>
+                <div class="text-ink" style="font: var(--font-display-sm);">{{ records|length }}</div>
             </div>
             <div>
-                <div style="color: #7f8c8d; font-size: 13px;">Tepat Waktu</div>
-                <div style="font-size: 24px; font-weight: bold; color: #27ae60;">{{ records|selectattr('status', 'equalto', 'Hadir')|list|length }}</div>
+                <div class="text-uppercase text-muted" style="font: var(--font-caption);">Tepat Waktu</div>
+                <div class="text-success" style="font: var(--font-display-sm);">{{ records|selectattr('status', 'equalto', 'Hadir')|list|length }}</div>
             </div>
             <div>
-                <div style="color: #7f8c8d; font-size: 13px;">Terlambat</div>
-                <div style="font-size: 24px; font-weight: bold; color: #f39c12;">{{ records|selectattr('status', 'equalto', 'Terlambat')|list|length }}</div>
+                <div class="text-uppercase text-muted" style="font: var(--font-caption);">Terlambat</div>
+                <div class="text-warning" style="font: var(--font-display-sm);">{{ records|selectattr('status', 'equalto', 'Terlambat')|list|length }}</div>
             </div>
         </div>
     </div>
     {% else %}
-    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-        <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
+    <div class="text-center text-muted" style="padding: var(--spacing-xxl);">
         <p>Tidak ada data absensi untuk tanggal ini</p>
     </div>
     {% endif %}

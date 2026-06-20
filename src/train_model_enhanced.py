@@ -4,10 +4,39 @@ import numpy as np
 from src.database import get_db_connection
 from mysql.connector import Error
 
-def train_model():
-    """Train LBPH face recognition model"""
+def augment_image(img):
+    """Apply data augmentation to increase training samples"""
+    augmented = []
+
+    # Original
+    augmented.append(img)
+
+    # Slight rotation variations
+    rows, cols = img.shape
+    for angle in [-5, 5]:
+        M = cv2.getRotationMatrix2D((cols/2, rows/2), angle, 1)
+        rotated = cv2.warpAffine(img, M, (cols, rows))
+        augmented.append(rotated)
+
+    # Brightness variations
+    for beta in [-20, 20]:
+        bright = cv2.convertScaleAbs(img, alpha=1.0, beta=beta)
+        augmented.append(bright)
+
+    # Slight blur
+    blurred = cv2.GaussianBlur(img, (3, 3), 0)
+    augmented.append(blurred)
+
+    # Horizontal flip (for non-profile faces)
+    flipped = cv2.flip(img, 1)
+    augmented.append(flipped)
+
+    return augmented
+
+def train_model_enhanced():
+    """Train LBPH face recognition model with data augmentation"""
     print("=" * 50)
-    print("TRAINING MODEL FACE RECOGNITION")
+    print("ENHANCED TRAINING - DENGAN AUGMENTASI DATA")
     print("=" * 50)
 
     # Connect to database
@@ -34,16 +63,16 @@ def train_model():
 
         if not samples:
             print("Tidak ada sampel wajah yang ditemukan!")
-            print("Silakan registrasi siswa terlebih dahulu: python -m src.register_student")
             return
 
         print(f"Ditemukan {len(samples)} sampel wajah dari database.")
-        print("Memuat gambar...")
+        print("Memuat gambar dengan augmentasi...")
 
         # Prepare training data
         faces = []
         labels = []
         loaded_count = 0
+        augmented_count = 0
 
         for employee_id, image_path in samples:
             # Check if file exists
@@ -61,22 +90,28 @@ def train_model():
             # Standardize size to 150x150
             img = cv2.resize(img, (150, 150))
 
-            # Apply histogram equalization for better lighting consistency
+            # Apply histogram equalization
             img = cv2.equalizeHist(img)
 
-            faces.append(img)
-            labels.append(employee_id)
+            # Apply augmentation
+            augmented_images = augment_image(img)
+
+            for aug_img in augmented_images:
+                faces.append(aug_img)
+                labels.append(employee_id)
+                augmented_count += 1
+
             loaded_count += 1
 
         if loaded_count == 0:
             print("Tidak ada gambar yang berhasil dimuat!")
             return
 
-        print(f"Berhasil memuat {loaded_count} gambar.")
-        print("Memulai training model...")
+        print(f"Berhasil memuat {loaded_count} gambar asli.")
+        print(f"Total sampel setelah augmentasi: {augmented_count}")
+        print("Memulai training model dengan parameter optimal...")
 
         # Create LBPH face recognizer with optimized parameters
-        # radius=1, neighbors=8, grid_x=8, grid_y=8 for better accuracy
         recognizer = cv2.face.LBPHFaceRecognizer_create(
             radius=1,
             neighbors=8,
@@ -93,8 +128,8 @@ def train_model():
         recognizer.save(model_path)
 
         print(f"\nModel berhasil disimpan di: {model_path}")
-        print("Training selesai!")
-        print("\nAnda sekarang dapat menjalankan absensi: python -m src.attendance")
+        print("Enhanced training selesai!")
+        print(f"Rasio augmentasi: {augmented_count / loaded_count:.1f}x")
 
     except Error as e:
         print(f"Database error: {e}")
@@ -102,4 +137,4 @@ def train_model():
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    train_model()
+    train_model_enhanced()

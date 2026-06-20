@@ -1,37 +1,78 @@
 {% extends "base.html" %}
 
-{% block title %}Training Model - Sistem Absensi{% endblock %}
+{% block title %}Training Model - Attendify{% endblock %}
 
 {% block content %}
-<div class="train-page">
-    <h2>Training Model Face Recognition</h2>
-
-    <div class="train-container">
-        <div class="info-box">
-            <h3>ℹ️ Informasi</h3>
-            <p>Training model diperlukan setelah:</p>
-            <ul>
-                <li>Menambahkan siswa baru</li>
+<div class="card">
+    <div class="card-header">Training Model Face Recognition</div>
+    <div class="card-body">
+        <div class="alert alert-info" style="margin-bottom: var(--spacing-xl);">
+            <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: var(--spacing-sm);">ℹ️ Informasi</h3>
+            <p style="margin-bottom: var(--spacing-sm);">Training model diperlukan setelah:</p>
+            <ul style="margin-left: var(--spacing-lg); margin-bottom: var(--spacing-sm);">
+                <li>Menambahkan karyawan baru</li>
                 <li>Menambahkan sampel wajah baru</li>
                 <li>Pertama kali setup sistem</li>
             </ul>
             <p><strong>Proses training membutuhkan waktu beberapa detik hingga beberapa menit tergantung jumlah data.</strong></p>
         </div>
 
-        <div class="train-action">
+        <div style="text-align: center; margin: var(--spacing-2xl) 0;">
             <button id="startTraining" class="btn btn-primary btn-lg">🚀 Mulai Training</button>
         </div>
 
-        <div id="trainingStatus" class="status-box" style="display: none;">
-            <div class="loader"></div>
-            <p id="statusText">Memproses...</p>
+        <div id="trainingStatus" style="display: none; text-align: center; padding: var(--spacing-xl);">
+            <div style="width: 40px; height: 40px; border: 3px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto var(--spacing-md);"></div>
+            <p id="statusText" style="color: var(--color-secondary);">Memproses...</p>
         </div>
 
-        <div id="trainingResult" class="result-box" style="display: none;"></div>
+        <div id="trainingResult" style="display: none;"></div>
     </div>
 </div>
+
+<style>
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/train.js') }}"></script>
+<script>
+document.getElementById('startTraining').addEventListener('click', async function() {
+    const btn = this;
+    const statusDiv = document.getElementById('trainingStatus');
+    const resultDiv = document.getElementById('trainingResult');
+
+    btn.disabled = true;
+    btn.textContent = 'Training...';
+    statusDiv.style.display = 'block';
+    resultDiv.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/train', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+
+        const data = await response.json();
+
+        statusDiv.style.display = 'none';
+        resultDiv.style.display = 'block';
+
+        if (data.success) {
+            resultDiv.innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
+        } else {
+            resultDiv.innerHTML = '<div class="alert alert-error">' + data.message + '</div>';
+        }
+    } catch (error) {
+        statusDiv.style.display = 'none';
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<div class="alert alert-error">Error: ' + error.message + '</div>';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🚀 Mulai Training';
+    }
+});
+</script>
 {% endblock %}

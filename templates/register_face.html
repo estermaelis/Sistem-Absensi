@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+
+{% block title %}Registrasi Wajah - Attendify{% endblock %}
+
+{% block extra_css %}
+<style>
+.register-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
+}
+
+.form-section, .camera-section {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: var(--spacing-xl);
+}
+
+.form-section h3, .camera-section h3 {
+    margin-top: 0;
+}
+
+#videoFeed {
+    width: 100%;
+    max-width: 640px;
+    height: auto;
+    background: #111;
+    border-radius: 0.5rem;
+    margin-bottom: var(--spacing-lg);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--color-border);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-top: var(--spacing-sm);
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--color-primary);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.guide-box {
+    background: var(--color-background);
+    border-left: 4px solid var(--color-primary);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    border-radius: 0.5rem;
+    display: none;
+}
+
+.guide-box h4 { margin: 0 0 var(--spacing-xs) 0; }
+.guide-box p { margin: 0; font-size: 0.875rem; color: var(--color-secondary); }
+
+.message {
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    display: none;
+}
+.message.success { background: #d4e9e2; color: #0d4e35; }
+.message.error { background: #fbe6e4; color: #8a160e; }
+.message.info { background: #edebe9; color: #1E3932; }
+
+@media (max-width: 1024px) {
+    .register-container { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">Registrasi Wajah Karyawan</div>
+    <div class="card-body">
+        <p style="margin: 0; font-size: 0.875rem; color: var(--color-secondary);">Isi data karyawan, lalu pindai wajah dari beberapa arah. Model akan dilatih otomatis setelah pemindaian selesai.</p>
+    </div>
+</div>
+
+<div class="register-container">
+    <div class="form-section">
+        <h3>Data Karyawan</h3>
+        <form id="studentForm">
+            <div class="form-group">
+                <label class="form-label" for="nip">NIP</label>
+                <input type="text" id="nip" name="nip" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="name">Nama Lengkap</label>
+                <input type="text" id="name" name="name" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="department_id">Departemen</label>
+                <select id="department_id" name="department_id" class="form-select">
+                    <option value="">-- Tidak ada --</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}">{{ dept.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="gender">Jenis Kelamin</label>
+                <select id="gender" name="gender" class="form-select" required>
+                    <option value="">Pilih...</option>
+                    <option value="L">Laki-laki</option>
+                    <option value="P">Perempuan</option>
+                </select>
+            </div>
+            <button type="submit" id="saveStudent" class="btn btn-primary" style="width: 100%;">Simpan Data &amp; Lanjut Pindai Wajah</button>
+        </form>
+    </div>
+
+    <div class="camera-section">
+        <h3>Pemindaian Wajah</h3>
+        <p id="cameraPrompt" style="font-size: 0.875rem; color: var(--color-secondary);">Simpan data karyawan terlebih dahulu untuk mengaktifkan pemindaian.</p>
+
+        <div id="guideBox" class="guide-box">
+            <h4 id="guideTitle">Instruksi Arah</h4>
+            <p id="guideText">Menunggu pemindaian dimulai...</p>
+        </div>
+
+        <img id="videoFeed" src="" alt="Video Feed" style="display: none;">
+
+        <div id="captureInfo" style="display: none; margin-bottom: var(--spacing-lg);">
+            <p style="margin: 0; font-size: 0.875rem;" id="captureStatus">Kamera aktif</p>
+            <div class="progress-bar"><div id="progressBar" class="progress-fill"></div></div>
+        </div>
+
+        <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+            <button id="startCamera" class="btn btn-primary" style="display: none;">Mulai Kamera</button>
+            <button id="startCaptureBtn" class="btn btn-success" style="display: none;">Mulai Pindai Wajah</button>
+            <a href="{{ url_for('index') }}" id="goAttendanceBtn" class="btn btn-success" style="display: none; text-decoration: none;">Lakukan Absensi</a>
+            <button id="stopCamera" class="btn btn-secondary" style="display: none;">Stop Kamera</button>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentStudentId = null;
+let capturing = false;
+let statusInterval = null;
+
+document.getElementById('studentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('saveStudent');
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+
+    const payload = {
+        nip: document.getElementById('nip').value.trim(),
+        name: document.getElementById('name').value.trim(),
+        department_id: document.getElementById('department_id').value || null,
+        gender: document.getElementById('gender').value.trim()
+    };
+
+    try {
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            currentStudentId = result.employee_id;
+            showMessage('Data tersimpan. Aktifkan kamera untuk memindai wajah.', 'success');
+            document.getElementById('cameraPrompt').textContent = 'Klik "Mulai Kamera" untuk mengaktifkan video feed.';
+            document.getElementById('startCamera').style.display = 'inline-block';
+            document.querySelectorAll('#studentForm input, #studentForm select').forEach(el => el.disabled = true);
+            btn.style.display = 'none';
+        } else {
+            showMessage(result.message, 'error');
+            btn.disabled = false;
+            btn.textContent = 'Simpan Data & Lanjut Pindai Wajah';
+        }
+    } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Simpan Data & Lanjut Pindai Wajah';
+    }
+});
+
+document.getElementById('startCamera').addEventListener('click', async function() {
+    try {
+        const response = await fetch('/api/start_camera', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({})
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById('videoFeed').src = '/video_feed';
+            document.getElementById('videoFeed').style.display = 'block';
+            document.getElementById('captureInfo').style.display = 'block';
+            document.getElementById('cameraPrompt').style.display = 'none';
+            document.getElementById('guideBox').style.display = 'block';
+            document.getElementById('startCamera').style.display = 'none';
+            document.getElementById('startCaptureBtn').style.display = 'inline-block';
+            document.getElementById('stopCamera').style.display = 'inline-block';
+            document.getElementById('guideText').textContent = 'Klik tombol "Mulai Pindai Wajah" di bawah.';
+            showMessage('Kamera berhasil diaktifkan', 'success');
+        } else {
+            showMessage(result.message, 'error');
+        }
+    } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+    }
+});
+
+document.getElementById('startCaptureBtn').addEventListener('click', async function() {
+    if (capturing || !currentStudentId) return;
+    capturing = true;
+    document.getElementById('startCaptureBtn').disabled = true;
+    document.getElementById('stopCamera').disabled = true;
+
+    startPollingProgress();
+
+    try {
+        const response = await fetch('/api/capture_samples', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ employee_id: currentStudentId })
+        });
+        const result = await response.json();
+        clearInterval(statusInterval);
+
+        if (result.success) {
+            document.getElementById('progressBar').style.width = '100%';
+            await runModelTraining();
+        } else {
+            document.getElementById('guideTitle').textContent = 'Pindai Gagal';
+            document.getElementById('guideText').textContent = result.message;
+            showMessage(result.message, 'error');
+        }
+    } catch (error) {
+        clearInterval(statusInterval);
+        showMessage('Error: ' + error.message, 'error');
+    } finally {
+        capturing = false;
+        document.getElementById('startCaptureBtn').disabled = false;
+        document.getElementById('stopCamera').disabled = false;
+    }
+});
+
+function startPollingProgress() {
+    statusInterval = setInterval(async () => {
+        try {
+            const response = await fetch('/api/capture_status');
+            const data = await response.json();
+            if (data.running) {
+                const percent = data.total ? (data.saved / data.total) * 100 : 0;
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('captureStatus').textContent = `Mendapatkan foto: ${data.saved} / ${data.total}`;
+                updateGuide(data.phase);
+            }
+        } catch (e) {
+            console.error('Error polling status:', e);
+        }
+    }, 250);
+}
+
+function updateGuide(phase) {
+    const title = document.getElementById('guideTitle');
+    const text = document.getElementById('guideText');
+    if (phase === 'depan') {
+        title.textContent = 'Langkah 1: Hadap Depan';
+        text.textContent = 'Tatap kamera lurus ke depan secara tegak. Jaga posisi Anda.';
+    } else if (phase === 'kiri_kanan') {
+        title.textContent = 'Langkah 2: Toleh Kiri & Kanan';
+        text.textContent = 'Tolehkan kepala ke kiri dan ke kanan perlahan secara bergantian.';
+    } else if (phase === 'atas_bawah') {
+        title.textContent = 'Langkah 3: Dongak Atas & Bawah';
+        text.textContent = 'Dongakkan kepala ke atas dan tunduk ke bawah secara perlahan.';
+    }
+}
+
+async function runModelTraining() {
+    document.getElementById('guideTitle').textContent = 'Pelatihan Model';
+    document.getElementById('guideText').textContent = 'Melatih model dengan dataset wajah baru...';
+    document.getElementById('captureStatus').textContent = 'Melatih model (training)...';
+    document.getElementById('startCaptureBtn').style.display = 'none';
+
+    try {
+        const response = await fetch('/api/train', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById('guideTitle').textContent = 'Selesai!';
+            document.getElementById('guideText').textContent = 'Model berhasil dilatih. Karyawan siap melakukan absensi.';
+            document.getElementById('captureStatus').textContent = 'Registrasi Wajah Sukses 100%';
+            showMessage('Registrasi wajah sukses dan model berhasil dilatih!', 'success');
+            document.getElementById('goAttendanceBtn').style.display = 'inline-block';
+        } else {
+            document.getElementById('guideTitle').textContent = 'Training Gagal';
+            document.getElementById('guideText').textContent = result.message;
+            document.getElementById('startCaptureBtn').style.display = 'inline-block';
+        }
+    } catch (error) {
+        document.getElementById('guideTitle').textContent = 'Training Error';
+        document.getElementById('guideText').textContent = error.message;
+        document.getElementById('startCaptureBtn').style.display = 'inline-block';
+    }
+}
+
+document.getElementById('stopCamera').addEventListener('click', async function() {
+    try {
+        const response = await fetch('/api/stop_camera', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({})
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById('videoFeed').style.display = 'none';
+            document.getElementById('videoFeed').src = '';
+            document.getElementById('captureInfo').style.display = 'none';
+            document.getElementById('guideBox').style.display = 'none';
+            document.getElementById('startCamera').style.display = 'inline-block';
+            document.getElementById('startCaptureBtn').style.display = 'none';
+            document.getElementById('stopCamera').style.display = 'none';
+            showMessage('Kamera dimatikan', 'success');
+        }
+    } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+    }
+});
+
+function showMessage(message, type) {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = message;
+    messageEl.className = 'message ' + type;
+    messageEl.style.display = 'block';
+    setTimeout(() => { messageEl.style.display = 'none'; }, 6000);
+}
+</script>
+{% endblock %}

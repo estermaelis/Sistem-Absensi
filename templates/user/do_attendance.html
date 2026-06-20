@@ -16,7 +16,7 @@
 .camera-section, .info-section {
     background: var(--color-canvas);
     border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-none);
+    border-radius: var(--rounded-lg);
     padding: var(--spacing-xl);
 }
 
@@ -32,14 +32,14 @@
     height: auto;
     background: var(--color-surface-dark);
     border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-none);
+    border-radius: var(--rounded-lg);
     margin-bottom: var(--spacing-lg);
 }
 
 .status-card {
     background: var(--color-surface);
     border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-none);
+    border-radius: var(--rounded-lg);
     padding: var(--spacing-md);
     margin-bottom: var(--spacing-md);
 }
@@ -72,7 +72,7 @@
 .message {
     margin-top: var(--spacing-lg);
     padding: var(--spacing-md);
-    border-radius: var(--rounded-none);
+    border-radius: var(--rounded-md);
     font: var(--font-body-md);
 }
 
@@ -188,8 +188,14 @@ async function checkTodayAttendance() {
         if (result.attended) {
             document.getElementById('todayAttendanceCard').style.display = 'block';
             document.getElementById('todayStatus').textContent = result.status;
-            document.getElementById('todayTime').textContent = result.check_in_time;
-            showMessage('Anda sudah absen hari ini pada ' + result.check_in_time, 'info');
+            let timeText = 'Masuk: ' + result.check_in_time;
+            if (result.check_out_time) {
+                timeText += ' | Pulang: ' + result.check_out_time;
+                showMessage('Anda sudah absen masuk & pulang hari ini', 'info');
+            } else {
+                showMessage('Anda sudah absen masuk pada ' + result.check_in_time + '. Scan lagi untuk absen pulang.', 'info');
+            }
+            document.getElementById('todayTime').textContent = timeText;
         }
     } catch (error) {
         console.error('Error checking attendance:', error);
@@ -251,19 +257,25 @@ document.getElementById('doAttendance').addEventListener('click', async function
         const result = await response.json();
 
         if (result.success) {
-            showMessage(result.message + ' - ' + result.student.name, 'success');
+            showMessage(result.message + ' - ' + result.employee.name, 'success');
 
             // Update today's attendance card
             document.getElementById('todayAttendanceCard').style.display = 'block';
             document.getElementById('todayStatus').textContent = result.status;
 
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('todayTime').textContent = timeStr;
-
-            // Disable attendance button
-            document.getElementById('doAttendance').disabled = true;
-            document.getElementById('doAttendance').textContent = 'Sudah Absen';
+            const timeEl = document.getElementById('todayTime');
+            if (result.type === 'check_in') {
+                timeEl.textContent = 'Masuk: ' + (result.check_in_time || '-');
+                // Keep button enabled so user can later check out
+                document.getElementById('doAttendance').disabled = false;
+                document.getElementById('doAttendance').textContent = 'Absen Pulang';
+            } else if (result.type === 'check_out') {
+                // Append check-out time to whatever was shown
+                const prev = timeEl.textContent && timeEl.textContent !== '-' ? timeEl.textContent : '';
+                timeEl.textContent = (prev ? prev + ' | ' : '') + 'Pulang: ' + (result.check_out_time || '-');
+                document.getElementById('doAttendance').disabled = true;
+                document.getElementById('doAttendance').textContent = 'Sudah Absen Lengkap';
+            }
         } else {
             showMessage(result.message, 'error');
             document.getElementById('doAttendance').disabled = false;

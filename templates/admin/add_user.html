@@ -10,51 +10,47 @@
 
     <form method="POST" action="{{ url_for('admin_users.add_user') }}">
         <div style="max-width: 600px;">
-            <div id="usernameField" style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500;">Username <span style="color: red;">*</span></label>
-                <input type="text" name="username" id="usernameInput" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                <small style="color: #7f8c8d;">Username untuk login (hanya untuk Admin)</small>
+            <div id="usernameField" class="form-group">
+                <label class="form-label form-label-required">Username</label>
+                <input type="text" name="username" id="usernameInput" class="form-input">
+                <small class="form-help">Username untuk login (hanya untuk Admin)</small>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500;">Role <span style="color: red;">*</span></label>
-                <select name="role" id="roleSelect" required onchange="toggleFields()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+            <div class="form-group">
+                <label class="form-label form-label-required">Role</label>
+                <select name="role" id="roleSelect" required onchange="toggleFields()" class="form-select">
                     <option value="">-- Pilih Role --</option>
                     <option value="admin">Admin</option>
-                    <option value="user">User (Siswa)</option>
+                    <option value="user">User (Karyawan)</option>
                 </select>
             </div>
 
-            <div id="nisField" style="margin-bottom: 20px; display: none;">
-                <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500;">NIS Siswa <span style="color: red;">*</span></label>
-                <select name="nis" id="nisSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                    <option value="">-- Pilih Siswa --</option>
-                    {% for student in students %}
-                    <option value="{{ student.nis }}">{{ student.nis }} - {{ student.name }}</option>
+            <div id="nisField" class="form-group" style="display: none;">
+                <label class="form-label form-label-required">NIP Karyawan</label>
+                <select name="nip" id="nisSelect" class="form-select">
+                    <option value="">-- Pilih Karyawan --</option>
+                    {% for employee in employees %}
+                    <option value="{{ employee.nip }}">{{ employee.nip }} - {{ employee.name }}</option>
                     {% endfor %}
                 </select>
-                <small style="color: #7f8c8d;">NIS akan digunakan sebagai username untuk login</small>
+                <small class="form-help">NIP akan digunakan sebagai username untuk login</small>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500;">Password <span style="color: red;">*</span></label>
-                <input type="password" name="password" required minlength="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                <small style="color: #7f8c8d;">Minimal 6 karakter</small>
+            <div class="form-group">
+                <label class="form-label form-label-required">Password</label>
+                <input type="password" name="password" required minlength="6" class="form-input">
+                <small class="form-help">Minimal 6 karakter</small>
             </div>
 
-            <div id="fullNameField" style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500;">Nama Lengkap <span style="color: red;">*</span></label>
-                <input type="text" name="full_name" id="fullNameInput" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                <small style="color: #7f8c8d;" id="fullNameNote">Nama lengkap (hanya untuk Admin)</small>
+            <div id="fullNameField" class="form-group">
+                <label class="form-label form-label-required">Nama Lengkap</label>
+                <input type="text" name="full_name" id="fullNameInput" class="form-input">
+                <small class="form-help" id="fullNameNote">Nama lengkap (hanya untuk Admin)</small>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 30px;">
-                <button type="submit" style="padding: 12px 24px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500;">
-                    ➕ Tambah User
-                </button>
-                <a href="{{ url_for('admin_users.users') }}" style="padding: 12px 24px; background: #95a5a6; color: white; border-radius: 5px; text-decoration: none; font-size: 14px; font-weight: 500; display: inline-block;">
-                    ← Kembali
-                </a>
+            <div class="flex gap-sm mt-lg">
+                <button type="submit" class="btn btn-success">Tambah User</button>
+                <a href="{{ url_for('admin_users.users') }}" class="btn btn-secondary">Kembali</a>
             </div>
         </div>
     </form>
@@ -74,7 +70,7 @@ function toggleFields() {
     const fullNameNote = document.getElementById('fullNameNote');
 
     if (roleSelect.value === 'user') {
-        // Untuk User: sembunyikan username & nama lengkap, tampilkan NIS
+        // Untuk User: sembunyikan username & nama lengkap, tampilkan NIP
         usernameField.style.display = 'none';
         usernameInput.removeAttribute('required');
         fullNameField.style.display = 'none';
@@ -82,7 +78,7 @@ function toggleFields() {
         nisField.style.display = 'block';
         nisSelect.setAttribute('required', 'required');
     } else if (roleSelect.value === 'admin') {
-        // Untuk Admin: tampilkan username & nama lengkap, sembunyikan NIS
+        // Untuk Admin: tampilkan username & nama lengkap, sembunyikan NIP
         usernameField.style.display = 'block';
         usernameInput.setAttribute('required', 'required');
         fullNameField.style.display = 'block';

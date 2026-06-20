@@ -7,83 +7,104 @@
 {% block content %}
 <div class="card">
     <h2 class="card-title">Statistik Keseluruhan</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-        <div style="background: #e8f5e9; padding: 20px; border-radius: 8px;">
-            <div style="color: #2e7d32; font-size: 14px; margin-bottom: 5px;">Total Siswa Pernah Hadir</div>
-            <div style="font-size: 32px; font-weight: bold; color: #1b5e20;">{{ overall.total_siswa_hadir or 0 }}</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md);">
+        <div class="stat-tile stat-tile-accent">
+            <div class="stat-label">Total Karyawan Pernah Hadir</div>
+            <div class="stat-value">{{ overall.total_karyawan_hadir or 0 }}</div>
         </div>
-        <div style="background: #e3f2fd; padding: 20px; border-radius: 8px;">
-            <div style="color: #1565c0; font-size: 14px; margin-bottom: 5px;">Total Record Absensi</div>
-            <div style="font-size: 32px; font-weight: bold; color: #0d47a1;">{{ overall.total_absensi or 0 }}</div>
+        <div class="stat-tile">
+            <div class="stat-label">Total Record Absensi</div>
+            <div class="stat-value">{{ overall.total_absensi or 0 }}</div>
         </div>
-        <div style="background: #f3e5f5; padding: 20px; border-radius: 8px;">
-            <div style="color: #6a1b9a; font-size: 14px; margin-bottom: 5px;">Hadir Tepat Waktu</div>
-            <div style="font-size: 32px; font-weight: bold; color: #4a148c;">{{ overall.tepat_waktu or 0 }}</div>
+        <div class="stat-tile">
+            <div class="stat-label">Hadir Tepat Waktu</div>
+            <div class="stat-value">{{ overall.tepat_waktu or 0 }}</div>
         </div>
-        <div style="background: #fff3e0; padding: 20px; border-radius: 8px;">
-            <div style="color: #e65100; font-size: 14px; margin-bottom: 5px;">Terlambat</div>
-            <div style="font-size: 32px; font-weight: bold; color: #bf360c;">{{ overall.terlambat or 0 }}</div>
+        <div class="stat-tile">
+            <div class="stat-label">Terlambat</div>
+            <div class="stat-value">{{ overall.terlambat or 0 }}</div>
         </div>
     </div>
     {% if overall.avg_confidence %}
-    <div style="margin-top: 15px; padding: 15px; background: #fce4ec; border-radius: 8px;">
-        <div style="color: #c2185b; font-size: 14px;">Rata-rata Confidence</div>
-        <div style="font-size: 24px; font-weight: bold; color: #880e4f;">{{ "%.2f"|format(overall.avg_confidence) }}%</div>
+    <div class="card-soft mt-md p-md">
+        <div class="profile-label">Rata-rata Confidence</div>
+        <div class="profile-value">{{ "%.2f"|format(overall.avg_confidence) }}%</div>
+    </div>
+    {% endif %}
+
+    {% if overall.total_absensi %}
+    <div style="margin-top: var(--spacing-lg); max-width: 320px; margin-left: auto; margin-right: auto;">
+        <canvas id="statusChart"></canvas>
     </div>
     {% endif %}
 </div>
 
-<div class="card" style="margin-top: 20px;">
+<div class="card mt-lg">
     <h2 class="card-title">Statistik Bulan Ini</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-        <div style="background: #e1f5fe; padding: 20px; border-radius: 8px;">
-            <div style="color: #01579b; font-size: 14px; margin-bottom: 5px;">Siswa Hadir Bulan Ini</div>
-            <div style="font-size: 32px; font-weight: bold; color: #01579b;">{{ monthly.siswa_hadir or 0 }}</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md);">
+        <div class="stat-tile">
+            <div class="stat-label">Karyawan Hadir Bulan Ini</div>
+            <div class="stat-value">{{ monthly.karyawan_hadir or 0 }}</div>
         </div>
-        <div style="background: #e8f5e9; padding: 20px; border-radius: 8px;">
-            <div style="color: #1b5e20; font-size: 14px; margin-bottom: 5px;">Total Absensi</div>
-            <div style="font-size: 32px; font-weight: bold; color: #1b5e20;">{{ monthly.total_absensi or 0 }}</div>
+        <div class="stat-tile">
+            <div class="stat-label">Total Absensi</div>
+            <div class="stat-value">{{ monthly.total_absensi or 0 }}</div>
         </div>
-        <div style="background: #f1f8e9; padding: 20px; border-radius: 8px;">
-            <div style="color: #33691e; font-size: 14px; margin-bottom: 5px;">Tepat Waktu</div>
-            <div style="font-size: 32px; font-weight: bold; color: #33691e;">{{ monthly.tepat_waktu or 0 }}</div>
+        <div class="stat-tile">
+            <div class="stat-label">Tepat Waktu</div>
+            <div class="stat-value">{{ monthly.tepat_waktu or 0 }}</div>
         </div>
-        <div style="background: #fff8e1; padding: 20px; border-radius: 8px;">
-            <div style="color: #f57f17; font-size: 14px; margin-bottom: 5px;">Terlambat</div>
-            <div style="font-size: 32px; font-weight: bold; color: #f57f17;">{{ monthly.terlambat or 0 }}</div>
+        <div class="stat-tile">
+            <div class="stat-label">Terlambat</div>
+            <div class="stat-value">{{ monthly.terlambat or 0 }}</div>
         </div>
     </div>
 </div>
 
-{% if top_students %}
-<div class="card" style="margin-top: 20px;">
-    <h2 class="card-title">🏆 Top 5 Siswa Paling Rajin</h2>
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse;">
+{% if top_employees %}
+<div class="card mt-lg">
+    <h2 class="card-title">Top 5 Karyawan Paling Rajin</h2>
+    <div class="table-container">
+        <table class="table">
             <thead>
-                <tr style="background: #ecf0f1;">
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Peringkat</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">NIS</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Nama</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #bdc3c7;">Total Kehadiran</th>
+                <tr>
+                    <th>Peringkat</th>
+                    <th>NIP</th>
+                    <th>Nama</th>
+                    <th>Total Kehadiran</th>
                 </tr>
             </thead>
             <tbody>
-                {% for student in top_students %}
-                <tr style="border-bottom: 1px solid #ecf0f1;">
-                    <td style="padding: 12px;">
-                        <span style="display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; {% if loop.index == 1 %}background: #ffd700; color: white;{% elif loop.index == 2 %}background: #c0c0c0; color: white;{% elif loop.index == 3 %}background: #cd7f32; color: white;{% else %}background: #ecf0f1; color: #7f8c8d;{% endif %}">
-                            {{ loop.index }}
-                        </span>
-                    </td>
-                    <td style="padding: 12px;">{{ student.nis }}</td>
-                    <td style="padding: 12px;"><strong>{{ student.name }}</strong></td>
-                    <td style="padding: 12px;">{{ student.total_hadir }} hari</td>
+                {% for employee in top_employees %}
+                <tr>
+                    <td><span class="badge {% if loop.index <= 3 %}badge-warning{% else %}badge-muted{% endif %}">#{{ loop.index }}</span></td>
+                    <td>{{ employee.nip }}</td>
+                    <td><strong>{{ employee.name }}</strong></td>
+                    <td>{{ employee.total_hadir }} hari</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if overall.total_absensi %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Tepat Waktu', 'Terlambat'],
+        datasets: [{
+            data: [{{ overall.tepat_waktu or 0 }}, {{ overall.terlambat or 0 }}],
+            backgroundColor: ['#2f9e44', '#ecab37']
+        }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+</script>
 {% endif %}
 {% endblock %}

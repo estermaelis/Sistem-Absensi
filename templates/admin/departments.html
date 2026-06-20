@@ -1,0 +1,111 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Kelola Departemen{% endblock %}
+{% block page_title %}Kelola Departemen{% endblock %}
+{% block breadcrumb %}Home / Kelola Departemen{% endblock %}
+
+{% block content %}
+<div class="card mb-lg">
+    <h2 class="card-title">Tambah Departemen</h2>
+    <form method="POST" action="{{ url_for('departments.add') }}" class="flex gap-sm items-center">
+        <input type="text" name="name" placeholder="Nama departemen baru..." required class="form-input" style="flex: 1;">
+        <button type="submit" class="btn btn-primary">Tambah</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2 class="card-title">Daftar Departemen</h2>
+
+    {% if departments %}
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nama Departemen</th>
+                    <th>Jumlah Karyawan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dept in departments %}
+                <tr id="row-{{ dept.id }}">
+                    <td>{{ dept.id }}</td>
+                    <td><strong id="name-{{ dept.id }}">{{ dept.name }}</strong></td>
+                    <td>{{ dept.employee_count }}</td>
+                    <td>
+                        <div class="flex gap-xs" style="flex-wrap: wrap;">
+                            <button onclick="editDepartment({{ dept.id }})" class="btn btn-secondary btn-sm">Edit</button>
+                            <button onclick="deleteDepartment({{ dept.id }}, '{{ dept.name }}', {{ dept.employee_count }})" class="btn btn-error btn-sm">Hapus</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-md text-muted" style="font: var(--font-body-sm);">
+        Total: {{ departments|length }} departemen
+    </div>
+    {% else %}
+    <div class="text-center text-muted" style="padding: var(--spacing-xxl);">
+        <p>Belum ada departemen. Tambahkan departemen pertama di atas.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function editDepartment(id) {
+    const current = document.getElementById('name-' + id).textContent;
+    const newName = prompt('Nama departemen baru:', current);
+    if (newName === null || newName.trim() === '' || newName.trim() === current) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('name', newName.trim());
+
+    fetch(`/admin/departments/${id}/edit`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('name-' + id).textContent = data.name;
+            alert(data.message);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => alert('Error: ' + error));
+}
+
+function deleteDepartment(id, name, count) {
+    let warning = `Yakin ingin menghapus departemen "${name}"?`;
+    if (count > 0) {
+        warning += `\n\n${count} karyawan terkait akan kehilangan departemen (tidak terhapus, hanya departemennya dikosongkan).`;
+    }
+    if (!confirm(warning)) {
+        return;
+    }
+
+    fetch(`/admin/departments/${id}/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => alert('Error: ' + error));
+}
+</script>
+{% endblock %}

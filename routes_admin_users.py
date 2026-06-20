@@ -2,9 +2,11 @@
 Admin routes for Flask web application
 Part 2: User management and reports routes
 """
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, send_file
 from src.auth_web import admin_required, get_current_user, create_user, reset_user_password
 from src.database import get_db_connection
+from src.export_report import fetch_attendance_rows, build_csv, build_excel, build_pdf
+from src.activity_log import log_activity
 from mysql.connector import Error
 from datetime import datetime, timedelta
 
@@ -25,9 +27,9 @@ def users():
         cursor = connection.cursor(dictionary=True)
         query = """
             SELECT u.id, u.username, u.full_name, u.role, u.is_active,
-                   s.nis, s.name as student_name, u.last_login
+                   e.nip, e.name as employee_name, u.last_login
             FROM users u
-            LEFT JOIN students s ON u.student_id = s.id
+            LEFT JOIN employees e ON u.employee_id = e.id
             ORDER BY u.role, u.username
         """
         cursor.execute(query)
@@ -51,7 +53,7 @@ def add_user():
         password = request.form.get('password', '').strip()
         full_name = request.form.get('full_name', '').strip()
         role = request.form.get('role', '').strip()
-        nis = request.form.get('nis', '').strip()
+        nip = request.form.get('nip', '').strip()
 
         # Validasi role
         if not role:
@@ -71,14 +73,14 @@ def add_user():
             flash('Password minimal 6 karakter', 'danger')
             return redirect(url_for('admin_users.add_user'))
 
-        # Untuk role user, gunakan NIS sebagai username
-        student_id = None
+        # Untuk role user, gunakan NIP sebagai username
+        employee_id = None
         if role == 'user':
-            if not nis:
-                flash('NIS harus dipilih untuk role User', 'danger')
+            if not nip:
+                flash('NIP harus dipilih untuk role User', 'danger')
                 return redirect(url_for('admin_users.add_user'))
 
-            # Ambil data siswa dari database
+            # Ambil data karyawan dari database
             connection = get_db_connection()
             if not connection:
                 flash('Koneksi database gagal', 'danger')
@@ -86,19 +88,19 @@ def add_user():
 
             try:
                 cursor = connection.cursor(dictionary=True)
-                cursor.execute("SELECT id, name FROM students WHERE nis = %s", (nis,))
-                student = cursor.fetchone()
+                cursor.execute("SELECT id, name FROM employees WHERE nip = %s", (nip,))
+                employee = cursor.fetchone()
                 cursor.close()
                 connection.close()
 
-                if not student:
-                    flash(f'NIS {nis} tidak ditemukan dalam data siswa', 'danger')
+                if not employee:
+                    flash(f'NIP {nip} tidak ditemukan dalam data karyawan', 'danger')
                     return redirect(url_for('admin_users.add_user'))
 
-                # Set username dan full_name dari data siswa
-                username = nis
-                full_name = student['name']
-                student_id = student['id']
+                # Set username dan full_name dari data karyawan
+                username = nip
+                full_name = employee['name']
+                employee_id = employee['id']
 
             except Error as e:
                 flash(f'Database error: {e}', 'danger')
@@ -115,9 +117,10 @@ def add_user():
                 return redirect(url_for('admin_users.add_user'))
 
         # Buat user
-        success, message = create_user(username, password, full_name, role, student_id)
+        success, message = create_user(username, password, full_name, role, employee_id)
 
         if success:
+            log_activity(user['id'], user['username'], 'tambah_user', f'User: {username} (role {role})')
             flash(message, 'success')
             return redirect(url_for('admin_users.users'))
         else:
@@ -126,18 +129,18 @@ def add_user():
 
     # GET request
     connection = get_db_connection()
-    students_list = []
+    employees_list = []
     if connection:
         try:
             cursor = connection.cursor(dictionary=True)
-            cursor.execute("SELECT nis, name FROM students WHERE is_active = 1 ORDER BY name")
-            students_list = cursor.fetchall()
+            cursor.execute("SELECT nip, name FROM employees WHERE is_active = 1 ORDER BY name")
+            employees_list = cursor.fetchall()
             cursor.close()
             connection.close()
         except Error:
             pass
 
-    return render_template('admin/add_user.html', user=user, students=students_list)
+    return render_template('admin/add_user.html', user=user, employees=employees_list)
 
 @admin_users_bp.route('/users/<int:user_id>/reset-password', methods=['POST'])
 @admin_required
@@ -152,6 +155,8 @@ def reset_password(user_id):
     success, message = reset_user_password(user_id, new_password)
 
     if success:
+        u = get_current_user()
+        log_activity(u['id'], u['username'], 'reset_password', f'Reset password user ID {user_id}')
         return jsonify({'success': True, 'message': message})
     else:
         return jsonify({'success': False, 'message': message}), 500
@@ -187,6 +192,8 @@ def toggle_user_status(user_id):
         connection.close()
 
         status_text = "Aktif" if new_status else "Nonaktif"
+        u = get_current_user()
+        log_activity(u['id'], u['username'], 'toggle_user', f'User ID {user_id} -> {status_text}')
         return jsonify({'success': True, 'message': f'Status berhasil diubah menjadi {status_text}', 'new_status': new_status})
     except Error as e:
         return jsonify({'success': False, 'message': f'Database error: {e}'}), 500
@@ -220,6 +227,8 @@ def delete_user(user_id):
         cursor.close()
         connection.close()
 
+        u = get_current_user()
+        log_activity(u['id'], u['username'], 'hapus_user', f"User: {user_data['username']}")
         return jsonify({'success': True, 'message': f"User {user_data['username']} berhasil dihapus"})
     except Error as e:
         return jsonify({'success': False, 'message': f'Database error: {e}'}), 500
@@ -230,6 +239,72 @@ def reports():
     """View reports page"""
     user = get_current_user()
     return render_template('admin/reports.html', user=user)
+
+@admin_users_bp.route('/activity-log')
+@admin_required
+def activity_log():
+    """View system activity log"""
+    user = get_current_user()
+
+    connection = get_db_connection()
+    if connection is None:
+        flash('Koneksi database gagal', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+    try:
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, user_id, username, action, detail, created_at
+            FROM activity_logs
+            ORDER BY created_at DESC
+            LIMIT 200
+        """)
+        logs = cursor.fetchall()
+        cursor.close()
+        connection.close()
+
+        return render_template('admin/activity_log.html', user=user, logs=logs)
+    except Error as e:
+        flash(f'Database error: {e}', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+@admin_users_bp.route('/reports/export/<fmt>')
+@admin_required
+def export_report_route(fmt):
+    """Export attendance report as csv, excel, or pdf"""
+    start_date = request.args.get('start_date') or None
+    end_date = request.args.get('end_date') or None
+
+    if fmt not in ('csv', 'excel', 'pdf'):
+        flash('Format export tidak valid', 'danger')
+        return redirect(url_for('admin_users.reports'))
+
+    try:
+        rows = fetch_attendance_rows(start_date, end_date)
+    except Exception as e:
+        flash(f'Error mengambil data: {e}', 'danger')
+        return redirect(url_for('admin_users.reports'))
+
+    if not rows:
+        flash('Tidak ada data absensi untuk diekspor', 'warning')
+        return redirect(url_for('admin_users.reports'))
+
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+
+    if fmt == 'csv':
+        buffer = build_csv(rows)
+        return send_file(buffer, mimetype='text/csv', as_attachment=True,
+                         download_name=f'laporan_absensi_{timestamp}.csv')
+    elif fmt == 'excel':
+        buffer = build_excel(rows)
+        return send_file(buffer,
+                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                         as_attachment=True,
+                         download_name=f'laporan_absensi_{timestamp}.xlsx')
+    else:  # pdf
+        buffer = build_pdf(rows)
+        return send_file(buffer, mimetype='application/pdf', as_attachment=True,
+                         download_name=f'laporan_absensi_{timestamp}.pdf')
 
 @admin_users_bp.route('/reports/daily')
 @admin_required
@@ -246,9 +321,10 @@ def daily_report():
     try:
         cursor = connection.cursor(dictionary=True)
         query = """
-            SELECT s.nis, s.name, s.class_name, a.check_in_time, a.status, a.confidence
+            SELECT e.nip, e.name, d.name AS department_name, a.check_in_time, a.check_out_time, a.status, a.confidence
             FROM attendance a
-            INNER JOIN students s ON a.student_id = s.id
+            INNER JOIN employees e ON a.employee_id = e.id
+            LEFT JOIN departments d ON e.department_id = d.id
             WHERE a.attendance_date = %s
             ORDER BY a.check_in_time
         """
@@ -282,7 +358,7 @@ def statistics():
         # Overall statistics
         cursor.execute("""
             SELECT
-                COUNT(DISTINCT student_id) as total_siswa_hadir,
+                COUNT(DISTINCT employee_id) as total_karyawan_hadir,
                 COUNT(*) as total_absensi,
                 SUM(CASE WHEN status = 'Hadir' THEN 1 ELSE 0 END) as tepat_waktu,
                 SUM(CASE WHEN status = 'Terlambat' THEN 1 ELSE 0 END) as terlambat,
@@ -294,7 +370,7 @@ def statistics():
         # Monthly statistics
         cursor.execute("""
             SELECT
-                COUNT(DISTINCT student_id) as siswa_hadir,
+                COUNT(DISTINCT employee_id) as karyawan_hadir,
                 COUNT(*) as total_absensi,
                 SUM(CASE WHEN status = 'Hadir' THEN 1 ELSE 0 END) as tepat_waktu,
                 SUM(CASE WHEN status = 'Terlambat' THEN 1 ELSE 0 END) as terlambat
@@ -304,16 +380,16 @@ def statistics():
         """)
         monthly = cursor.fetchone()
 
-        # Top students
+        # Top employees
         cursor.execute("""
-            SELECT s.nis, s.name, COUNT(a.id) as total_hadir
-            FROM students s
-            INNER JOIN attendance a ON s.id = a.student_id
-            GROUP BY s.id, s.nis, s.name
+            SELECT e.nip, e.name, COUNT(a.id) as total_hadir
+            FROM employees e
+            INNER JOIN attendance a ON e.id = a.employee_id
+            GROUP BY e.id, e.nip, e.name
             ORDER BY total_hadir DESC
             LIMIT 5
         """)
-        top_students = cursor.fetchall()
+        top_employees = cursor.fetchall()
 
         cursor.close()
         connection.close()
@@ -322,7 +398,7 @@ def statistics():
                              user=user,
                              overall=overall,
                              monthly=monthly,
-                             top_students=top_students)
+                             top_employees=top_employees)
     except Error as e:
         flash(f'Database error: {e}', 'danger')
         return redirect(url_for('admin.dashboard'))

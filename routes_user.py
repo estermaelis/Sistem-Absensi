@@ -16,25 +16,26 @@ def dashboard():
     """User dashboard"""
     user = get_current_user()
 
-    if not user['student_id']:
-        flash('Akun Anda tidak terhubung dengan data siswa/karyawan', 'warning')
-        return render_template('user/dashboard.html', user=user, student=None)
+    if not user['employee_id']:
+        flash('Akun Anda tidak terhubung dengan data karyawan', 'warning')
+        return render_template('user/dashboard.html', user=user, employee=None)
 
     connection = get_db_connection()
     if connection is None:
         flash('Koneksi database gagal', 'danger')
-        return render_template('user/dashboard.html', user=user, student=None)
+        return render_template('user/dashboard.html', user=user, employee=None)
 
     try:
         cursor = connection.cursor(dictionary=True)
 
-        # Get student info
+        # Get employee info
         cursor.execute("""
-            SELECT nis, name, class_name, gender
-            FROM students
-            WHERE id = %s
-        """, (user['student_id'],))
-        student = cursor.fetchone()
+            SELECT e.nip, e.name, d.name AS department_name, e.gender
+            FROM employees e
+            LEFT JOIN departments d ON e.department_id = d.id
+            WHERE e.id = %s
+        """, (user['employee_id'],))
+        employee = cursor.fetchone()
 
         # Get attendance statistics
         cursor.execute("""
@@ -43,28 +44,50 @@ def dashboard():
                 SUM(CASE WHEN status = 'Hadir' THEN 1 ELSE 0 END) as hadir_tepat_waktu,
                 SUM(CASE WHEN status = 'Terlambat' THEN 1 ELSE 0 END) as terlambat
             FROM attendance
-            WHERE student_id = %s
-        """, (user['student_id'],))
+            WHERE employee_id = %s
+        """, (user['employee_id'],))
         stats = cursor.fetchone()
 
         # Get this month attendance
         cursor.execute("""
             SELECT COUNT(*) as total
             FROM attendance
-            WHERE student_id = %s
+            WHERE employee_id = %s
             AND MONTH(attendance_date) = MONTH(CURDATE())
             AND YEAR(attendance_date) = YEAR(CURDATE())
-        """, (user['student_id'],))
+        """, (user['employee_id'],))
         monthly = cursor.fetchone()
+
+        # Status kehadiran hari ini (jam masuk & pulang)
+        cursor.execute("""
+            SELECT check_in_time, check_out_time, status
+            FROM attendance
+            WHERE employee_id = %s AND attendance_date = CURDATE()
+        """, (user['employee_id'],))
+        today = cursor.fetchone()
+
+        # Persentase kehadiran: hari hadir dibanding total hari kerja sejak absensi pertama
+        cursor.execute("""
+            SELECT
+                COUNT(*) as hari_hadir,
+                DATEDIFF(CURDATE(), MIN(attendance_date)) + 1 as rentang_hari
+            FROM attendance
+            WHERE employee_id = %s
+        """, (user['employee_id'],))
+        rate_row = cursor.fetchone()
+        if rate_row and rate_row['rentang_hari']:
+            attendance_rate = round((rate_row['hari_hadir'] / rate_row['rentang_hari']) * 100, 1)
+        else:
+            attendance_rate = 0
 
         # Get recent attendance
         cursor.execute("""
-            SELECT attendance_date, check_in_time, status, confidence
+            SELECT attendance_date, check_in_time, check_out_time, status, confidence
             FROM attendance
-            WHERE student_id = %s
+            WHERE employee_id = %s
             ORDER BY attendance_date DESC
             LIMIT 5
-        """, (user['student_id'],))
+        """, (user['employee_id'],))
         recent = cursor.fetchall()
 
         cursor.close()
@@ -72,13 +95,15 @@ def dashboard():
 
         return render_template('user/dashboard.html',
                              user=user,
-                             student=student,
+                             employee=employee,
                              stats=stats,
                              monthly=monthly,
+                             today=today,
+                             attendance_rate=attendance_rate,
                              recent=recent)
     except Error as e:
         flash(f'Database error: {e}', 'danger')
-        return render_template('user/dashboard.html', user=user, student=None)
+        return render_template('user/dashboard.html', user=user, employee=None)
 
 @user_bp.route('/profile')
 @user_required
@@ -86,32 +111,33 @@ def profile():
     """View user profile"""
     user = get_current_user()
 
-    if not user['student_id']:
-        flash('Akun Anda tidak terhubung dengan data siswa/karyawan', 'warning')
-        return render_template('user/profile.html', user=user, student=None)
+    if not user['employee_id']:
+        flash('Akun Anda tidak terhubung dengan data karyawan', 'warning')
+        return render_template('user/profile.html', user=user, employee=None)
 
     connection = get_db_connection()
     if connection is None:
         flash('Koneksi database gagal', 'danger')
-        return render_template('user/profile.html', user=user, student=None)
+        return render_template('user/profile.html', user=user, employee=None)
 
     try:
         cursor = connection.cursor(dictionary=True)
 
         cursor.execute("""
-            SELECT nis, name, class_name, gender, is_active, created_at
-            FROM students
-            WHERE id = %s
-        """, (user['student_id'],))
-        student = cursor.fetchone()
+            SELECT e.nip, e.name, d.name AS department_name, e.email, e.gender, e.is_active, e.created_at
+            FROM employees e
+            LEFT JOIN departments d ON e.department_id = d.id
+            WHERE e.id = %s
+        """, (user['employee_id'],))
+        employee = cursor.fetchone()
 
         cursor.close()
         connection.close()
 
-        return render_template('user/profile.html', user=user, student=student)
+        return render_template('user/profile.html', user=user, employee=employee)
     except Error as e:
         flash(f'Database error: {e}', 'danger')
-        return render_template('user/profile.html', user=user, student=None)
+        return render_template('user/profile.html', user=user, employee=None)
 
 @user_bp.route('/attendance')
 @user_required
@@ -119,8 +145,8 @@ def attendance():
     """View attendance history"""
     user = get_current_user()
 
-    if not user['student_id']:
-        flash('Akun Anda tidak terhubung dengan data siswa/karyawan', 'warning')
+    if not user['employee_id']:
+        flash('Akun Anda tidak terhubung dengan data karyawan', 'warning')
         return render_template('user/attendance_history.html', user=user, records=[])
 
     # Get filter parameters
@@ -139,36 +165,36 @@ def attendance():
         # Build query based on filter
         if filter_type == '7days':
             query = """
-                SELECT attendance_date, check_in_time, status, confidence
+                SELECT attendance_date, check_in_time, check_out_time, status, confidence
                 FROM attendance
-                WHERE student_id = %s AND attendance_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                WHERE employee_id = %s AND attendance_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
                 ORDER BY attendance_date DESC
             """
-            cursor.execute(query, (user['student_id'],))
+            cursor.execute(query, (user['employee_id'],))
         elif filter_type == '30days':
             query = """
-                SELECT attendance_date, check_in_time, status, confidence
+                SELECT attendance_date, check_in_time, check_out_time, status, confidence
                 FROM attendance
-                WHERE student_id = %s AND attendance_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                WHERE employee_id = %s AND attendance_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
                 ORDER BY attendance_date DESC
             """
-            cursor.execute(query, (user['student_id'],))
+            cursor.execute(query, (user['employee_id'],))
         elif filter_type == 'custom' and start_date and end_date:
             query = """
-                SELECT attendance_date, check_in_time, status, confidence
+                SELECT attendance_date, check_in_time, check_out_time, status, confidence
                 FROM attendance
-                WHERE student_id = %s AND attendance_date BETWEEN %s AND %s
+                WHERE employee_id = %s AND attendance_date BETWEEN %s AND %s
                 ORDER BY attendance_date DESC
             """
-            cursor.execute(query, (user['student_id'], start_date, end_date))
+            cursor.execute(query, (user['employee_id'], start_date, end_date))
         else:
             query = """
-                SELECT attendance_date, check_in_time, status, confidence
+                SELECT attendance_date, check_in_time, check_out_time, status, confidence
                 FROM attendance
-                WHERE student_id = %s
+                WHERE employee_id = %s
                 ORDER BY attendance_date DESC
             """
-            cursor.execute(query, (user['student_id'],))
+            cursor.execute(query, (user['employee_id'],))
 
         records = cursor.fetchall()
 
@@ -191,8 +217,8 @@ def statistics():
     """View attendance statistics"""
     user = get_current_user()
 
-    if not user['student_id']:
-        flash('Akun Anda tidak terhubung dengan data siswa/karyawan', 'warning')
+    if not user['employee_id']:
+        flash('Akun Anda tidak terhubung dengan data karyawan', 'warning')
         return render_template('user/statistics.html', user=user, stats=None)
 
     connection = get_db_connection()
@@ -213,8 +239,8 @@ def statistics():
                 MIN(attendance_date) as first_attendance,
                 MAX(attendance_date) as last_attendance
             FROM attendance
-            WHERE student_id = %s
-        """, (user['student_id'],))
+            WHERE employee_id = %s
+        """, (user['employee_id'],))
         overall = cursor.fetchone()
 
         # Monthly statistics for current year
@@ -225,10 +251,10 @@ def statistics():
                 SUM(CASE WHEN status = 'Hadir' THEN 1 ELSE 0 END) as hadir,
                 SUM(CASE WHEN status = 'Terlambat' THEN 1 ELSE 0 END) as terlambat
             FROM attendance
-            WHERE student_id = %s AND YEAR(attendance_date) = YEAR(CURDATE())
+            WHERE employee_id = %s AND YEAR(attendance_date) = YEAR(CURDATE())
             GROUP BY MONTH(attendance_date)
             ORDER BY bulan
-        """, (user['student_id'],))
+        """, (user['employee_id'],))
         monthly_stats = cursor.fetchall()
 
         cursor.close()
@@ -279,13 +305,13 @@ def change_password_page():
 @user_bp.route('/register')
 @user_required
 def register():
-    """Registration page for students"""
+    """Registration page for employees"""
     user = get_current_user()
     return render_template('user/register.html', user=user)
 
 @user_bp.route('/do-attendance')
 @user_required
 def do_attendance():
-    """Face recognition attendance page for students"""
+    """Face recognition attendance page for employees"""
     user = get_current_user()
     return render_template('user/do_attendance.html', user=user)

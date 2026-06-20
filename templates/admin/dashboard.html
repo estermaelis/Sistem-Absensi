@@ -5,65 +5,108 @@
 {% block breadcrumb %}Home / Dashboard{% endblock %}
 
 {% block content %}
-<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
-    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Total Siswa Aktif</div>
-        <div style="font-size: 36px; font-weight: bold;">{{ total_students }}</div>
-        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">👥 Siswa terdaftar</div>
+<div class="stats-grid mb-lg" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--spacing-lg);">
+    <div class="stat-tile stat-tile-accent">
+        <div class="stat-label">Total Karyawan Aktif</div>
+        <div class="stat-value">{{ total_employees }}</div>
+        <div class="stat-meta">Karyawan terdaftar</div>
     </div>
 
-    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Total User Aktif</div>
-        <div style="font-size: 36px; font-weight: bold;">{{ total_users }}</div>
-        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">🔑 Akun user</div>
+    <div class="stat-tile">
+        <div class="stat-label">Hadir Hari Ini</div>
+        <div class="stat-value">{{ today_attendance }}</div>
+        <div class="stat-meta">Sudah absen</div>
     </div>
 
-    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Absensi Hari Ini</div>
-        <div style="font-size: 36px; font-weight: bold;">{{ today_attendance }}</div>
-        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">📸 Hadir hari ini</div>
+    <div class="stat-tile">
+        <div class="stat-label">Tidak Hadir Hari Ini</div>
+        <div class="stat-value">{{ today_absent }}</div>
+        <div class="stat-meta">Belum absen</div>
     </div>
 
-    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Absensi Bulan Ini</div>
-        <div style="font-size: 36px; font-weight: bold;">{{ monthly_attendance }}</div>
-        <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">📅 Siswa hadir</div>
+    <div class="stat-tile">
+        <div class="stat-label">Terlambat Hari Ini</div>
+        <div class="stat-value">{{ today_late }}</div>
+        <div class="stat-meta">Absen lewat batas</div>
+    </div>
+
+    <div class="stat-tile">
+        <div class="stat-label">Persentase Kehadiran</div>
+        <div class="stat-value">{{ attendance_rate }}%</div>
+        <div class="stat-meta">Hari ini</div>
+    </div>
+
+    <div class="stat-tile">
+        <div class="stat-label">Total Departemen</div>
+        <div class="stat-value">{{ total_departments }}</div>
+        <div class="stat-meta">Departemen terdaftar</div>
+    </div>
+
+    <div class="stat-tile">
+        <div class="stat-label">Absensi Bulan Ini</div>
+        <div class="stat-value">{{ monthly_attendance }}</div>
+        <div class="stat-meta">Karyawan hadir</div>
+    </div>
+
+    <div class="stat-tile">
+        <div class="stat-label">Total User Aktif</div>
+        <div class="stat-value">{{ total_users }}</div>
+        <div class="stat-meta">Akun user</div>
+    </div>
+</div>
+
+<div class="card mb-lg">
+    <h2 class="card-title">Grafik Kehadiran Bulan Ini</h2>
+    <canvas id="monthlyChart" style="max-height: 320px;"></canvas>
+</div>
+
+<div class="card mb-lg">
+    <h2 class="card-title">Aktivitas Terbaru</h2>
+    {% if recent_activities %}
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Waktu</th>
+                    <th>User</th>
+                    <th>Aksi</th>
+                    <th>Detail</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for act in recent_activities %}
+                <tr>
+                    <td style="white-space: nowrap;">{{ act.created_at.strftime('%d-%m-%Y %H:%M') }}</td>
+                    <td>{{ act.username or '-' }}</td>
+                    <td><span class="badge badge-primary">{{ act.action }}</span></td>
+                    <td class="text-muted">{{ act.detail or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-md">
+        <a href="{{ url_for('admin_users.activity_log') }}" class="btn-text-link">Lihat semua log aktivitas</a>
+    </div>
+    {% else %}
+    <p class="text-center text-muted" style="padding: var(--spacing-lg);">Belum ada aktivitas tercatat</p>
+    {% endif %}
+</div>
+
+<div class="card mb-lg">
+    <h2 class="card-title">Menu Cepat</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md);">
+        <a href="{{ url_for('admin.students') }}" class="quick-menu-tile">Kelola Karyawan</a>
+        <a href="{{ url_for('admin_users.users') }}" class="quick-menu-tile">Kelola User</a>
+        <a href="{{ url_for('admin_users.reports') }}" class="quick-menu-tile">Laporan</a>
+        <a href="{{ url_for('admin_users.statistics') }}" class="quick-menu-tile">Statistik</a>
+        <a href="{{ url_for('logout') }}" class="quick-menu-tile">Logout</a>
     </div>
 </div>
 
 <div class="card">
-    <h2 class="card-title">Menu Cepat</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-        <a href="{{ url_for('admin.students') }}" style="display: block; padding: 20px; background: #3498db; color: white; text-align: center; border-radius: 5px; text-decoration: none; transition: transform 0.2s;">
-            <div style="font-size: 32px; margin-bottom: 10px;">👥</div>
-            <div style="font-weight: 500;">Kelola Siswa</div>
-        </a>
-
-        <a href="{{ url_for('admin_users.users') }}" style="display: block; padding: 20px; background: #9b59b6; color: white; text-align: center; border-radius: 5px; text-decoration: none; transition: transform 0.2s;">
-            <div style="font-size: 32px; margin-bottom: 10px;">🔑</div>
-            <div style="font-weight: 500;">Kelola User</div>
-        </a>
-
-        <a href="{{ url_for('admin_users.reports') }}" style="display: block; padding: 20px; background: #34495e; color: white; text-align: center; border-radius: 5px; text-decoration: none; transition: transform 0.2s;">
-            <div style="font-size: 32px; margin-bottom: 10px;">📋</div>
-            <div style="font-weight: 500;">Laporan</div>
-        </a>
-
-        <a href="{{ url_for('admin_users.statistics') }}" style="display: block; padding: 20px; background: #16a085; color: white; text-align: center; border-radius: 5px; text-decoration: none; transition: transform 0.2s;">
-            <div style="font-size: 32px; margin-bottom: 10px;">📈</div>
-            <div style="font-weight: 500;">Statistik</div>
-        </a>
-
-        <a href="{{ url_for('logout') }}" style="display: block; padding: 20px; background: #95a5a6; color: white; text-align: center; border-radius: 5px; text-decoration: none; transition: transform 0.2s;">
-            <div style="font-size: 32px; margin-bottom: 10px;">🚪</div>
-            <div style="font-weight: 500;">Logout</div>
-        </a>
-    </div>
-</div>
-
-<div class="card" style="margin-top: 20px;">
     <h2 class="card-title">Informasi Sistem</h2>
-    <div style="color: #7f8c8d; line-height: 1.8;">
+    <div class="text-muted" style="line-height: 1.8;">
         <p><strong>Selamat datang, {{ user.full_name }}!</strong></p>
         <p>Anda login sebagai <strong>Administrator</strong>. Anda memiliki akses penuh ke semua fitur sistem.</p>
         <p>Gunakan menu di sidebar atau menu cepat di atas untuk mengakses fitur yang Anda butuhkan.</p>
@@ -73,13 +116,62 @@
 
 {% block extra_css %}
 <style>
-    .stat-card:hover {
-        transform: translateY(-5px);
-        transition: transform 0.3s;
+    .quick-menu-tile {
+        display: block;
+        padding: var(--spacing-lg);
+        background: var(--color-near-black);
+        color: var(--color-on-dark);
+        text-align: center;
+        text-decoration: none;
+        font: var(--font-nav-link);
+        border-radius: var(--rounded-md);
+        box-shadow: var(--shadow-card);
+        transition: all 0.2s ease;
     }
-    a[style*="background"]:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    .quick-menu-tile:hover {
+        background: var(--color-cohere-black);
+        color: var(--color-on-primary);
     }
+    .quick-menu-tile:active { transform: scale(0.97); }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('monthlyChart');
+const labels = {{ chart_labels | tojson }};
+const hadir = {{ chart_hadir | tojson }};
+const terlambat = {{ chart_terlambat | tojson }};
+
+if (labels.length === 0) {
+    ctx.parentElement.innerHTML = '<p class="text-center text-muted" style="padding: var(--spacing-xxl);">Belum ada data absensi bulan ini</p>';
+} else {
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels.map(d => 'Tgl ' + d),
+            datasets: [
+                {
+                    label: 'Hadir',
+                    data: hadir,
+                    backgroundColor: '#2f9e44'
+                },
+                {
+                    label: 'Terlambat',
+                    data: terlambat,
+                    backgroundColor: '#ecab37'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+            }
+        }
+    });
+}
+</script>
 {% endblock %}

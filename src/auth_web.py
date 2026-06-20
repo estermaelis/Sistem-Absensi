@@ -35,7 +35,7 @@ def authenticate_user(username, password):
         cursor = connection.cursor(dictionary=True)
 
         query = """
-            SELECT id, username, password, full_name, role, student_id, is_active
+            SELECT id, username, password, full_name, role, employee_id, is_active
             FROM users
             WHERE username = %s
         """
@@ -73,7 +73,7 @@ def login_user(user_data):
     session['username'] = user_data['username']
     session['full_name'] = user_data['full_name']
     session['role'] = user_data['role']
-    session['student_id'] = user_data['student_id']
+    session['employee_id'] = user_data['employee_id']
     session['is_authenticated'] = True
 
 def logout_user():
@@ -101,7 +101,7 @@ def get_current_user():
         'username': session.get('username'),
         'full_name': session.get('full_name'),
         'role': session.get('role'),
-        'student_id': session.get('student_id')
+        'employee_id': session.get('employee_id')
     }
 
 def login_required(f):
@@ -140,7 +140,7 @@ def user_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def create_user(username, password, full_name, role='user', student_id=None):
+def create_user(username, password, full_name, role='user', employee_id=None):
     """
     Create new user account
     Returns: (success, message)
@@ -159,10 +159,10 @@ def create_user(username, password, full_name, role='user', student_id=None):
         hashed_pw = hash_password(password)
 
         query = """
-            INSERT INTO users (username, password, full_name, role, student_id)
+            INSERT INTO users (username, password, full_name, role, employee_id)
             VALUES (%s, %s, %s, %s, %s)
         """
-        cursor.execute(query, (username, hashed_pw, full_name, role, student_id))
+        cursor.execute(query, (username, hashed_pw, full_name, role, employee_id))
         connection.commit()
 
         cursor.close()

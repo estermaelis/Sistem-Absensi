@@ -1,398 +1,123 @@
----
-version: alpha
-name: BMW-design-analysis
-description: BMW's corporate site — distinct from BMW M's motorsport-bombastic variant, this is a measured and settled corporate-automotive interface. On a light (cream-tinted white) canvas, BMW corporate blue (#1c69d4) carries every primary CTA; dark navy hero bands frame model photography. BMW Type Next Latin sets the entire hierarchy on two weights — heavy 700 display and Light 300 body. Configuration and reservation flows ride a card-based 4-up grid, where each card holds a model render, a name, and a "Learn More" link.
-
-colors:
-  primary: "#1c69d4"
-  primary-active: "#0653b6"
-  primary-disabled: "#d6d6d6"
-  ink: "#262626"
-  body: "#3c3c3c"
-  body-strong: "#1a1a1a"
-  muted: "#6b6b6b"
-  muted-soft: "#9a9a9a"
-  hairline: "#e6e6e6"
-  hairline-strong: "#cccccc"
-  canvas: "#ffffff"
-  surface-soft: "#f7f7f7"
-  surface-card: "#fafafa"
-  surface-strong: "#ebebeb"
-  surface-dark: "#1a2129"
-  surface-dark-elevated: "#262e38"
-  on-primary: "#ffffff"
-  on-dark: "#ffffff"
-  on-dark-soft: "#bbbbbb"
-  m-blue-light: "#0066b1"
-  m-blue-dark: "#1c69d4"
-  m-red: "#e22718"
-  success: "#22c55e"
-  warning: "#f59e0b"
-  error: "#dc2626"
-
-typography:
-  display-xl:
-    fontFamily: "'BMW Type Next Latin', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-    fontSize: 64px
-    fontWeight: 700
-    lineHeight: 1.05
-    letterSpacing: 0
-  display-lg:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 48px
-    fontWeight: 700
-    lineHeight: 1.1
-    letterSpacing: 0
-  display-md:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 32px
-    fontWeight: 700
-    lineHeight: 1.15
-    letterSpacing: 0
-  display-sm:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 24px
-    fontWeight: 700
-    lineHeight: 1.25
-    letterSpacing: 0
-  title-lg:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 20px
-    fontWeight: 700
-    lineHeight: 1.3
-    letterSpacing: 0
-  title-md:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 18px
-    fontWeight: 700
-    lineHeight: 1.4
-    letterSpacing: 0
-  title-sm:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 16px
-    fontWeight: 700
-    lineHeight: 1.4
-    letterSpacing: 0
-  body-md:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 16px
-    fontWeight: 300
-    lineHeight: 1.55
-    letterSpacing: 0
-  body-sm:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 14px
-    fontWeight: 300
-    lineHeight: 1.55
-    letterSpacing: 0
-  caption:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 12px
-    fontWeight: 400
-    lineHeight: 1.4
-    letterSpacing: 0.5px
-  label-uppercase:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 13px
-    fontWeight: 700
-    lineHeight: 1.3
-    letterSpacing: 1.5px
-    textTransform: uppercase
-  button:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 14px
-    fontWeight: 700
-    lineHeight: 1.0
-    letterSpacing: 0.5px
-  nav-link:
-    fontFamily: "'BMW Type Next Latin', sans-serif"
-    fontSize: 14px
-    fontWeight: 400
-    lineHeight: 1.4
-    letterSpacing: 0.3px
-
-rounded:
-  none: 0px
-  xs: 2px
-  sm: 4px
-  md: 8px
-  lg: 12px
-  pill: 9999px
-  full: 9999px
-
-spacing:
-  xxs: 4px
-  xs: 8px
-  sm: 12px
-  md: 16px
-  lg: 24px
-  xl: 32px
-  xxl: 48px
-  section: 80px
-
-components:
-  top-nav:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.nav-link}"
-    height: 64px
-  button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button}"
-    rounded: "{rounded.none}"
-    padding: 14px 32px
-    height: 48px
-  button-primary-active:
-    backgroundColor: "{colors.primary-active}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.none}"
-  button-primary-disabled:
-    backgroundColor: "{colors.primary-disabled}"
-    textColor: "{colors.muted}"
-    rounded: "{rounded.none}"
-  button-secondary:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.button}"
-    rounded: "{rounded.none}"
-    padding: 13px 31px
-    height: 48px
-  button-secondary-on-dark:
-    backgroundColor: transparent
-    textColor: "{colors.on-dark}"
-    typography: "{typography.button}"
-    rounded: "{rounded.none}"
-    padding: 13px 31px
-  button-text-link:
-    backgroundColor: transparent
-    textColor: "{colors.ink}"
-    typography: "{typography.label-uppercase}"
-  text-link:
-    backgroundColor: transparent
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-  hero-band-dark:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.display-xl}"
-    padding: 80px
-  hero-photo-band:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.display-lg}"
-    padding: 80px
-  model-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title-md}"
-    rounded: "{rounded.none}"
-    padding: 24px
-  model-card-photo:
-    backgroundColor: "{colors.surface-card}"
-    rounded: "{rounded.none}"
-  feature-photo-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title-md}"
-    rounded: "{rounded.none}"
-    padding: 24px
-  spec-cell:
-    backgroundColor: transparent
-    textColor: "{colors.ink}"
-    typography: "{typography.display-sm}"
-    rounded: "{rounded.none}"
-    padding: 24px
-  inventory-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title-sm}"
-    rounded: "{rounded.none}"
-    padding: 16px
-  filter-chip:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.none}"
-    padding: 8px 14px
-  filter-chip-active:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.on-dark}"
-    rounded: "{rounded.none}"
-  configurator-option-tile:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.none}"
-    padding: 16px 24px
-  configurator-option-tile-selected:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.none}"
-    padding: 15px 23px
-  text-input:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.none}"
-    padding: 14px 16px
-    height: 48px
-  cookie-consent-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.body}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.none}"
-    padding: 24px
-  category-tab:
-    backgroundColor: transparent
-    textColor: "{colors.muted}"
-    typography: "{typography.label-uppercase}"
-    rounded: "{rounded.none}"
-  category-tab-active:
-    backgroundColor: transparent
-    textColor: "{colors.ink}"
-    typography: "{typography.label-uppercase}"
-    rounded: "{rounded.none}"
-  m-stripe-divider:
-    backgroundColor: transparent
-    rounded: "{rounded.none}"
-  cta-band-photo:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.display-md}"
-    padding: 80px
-  footer:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.body}"
-    typography: "{typography.body-sm}"
-    padding: 64px
----
-
 ## Overview
 
-BMW's corporate site carries a far more **measured, corporate-automotive** interface than its motorsport-bombastic cousin BMW M. The atmosphere is light: `{colors.canvas}` (#ffffff) is the base surface, `{colors.surface-card}` (#fafafa) carries the soft-grey card plates, and dark navy `{colors.surface-dark}` (#1a2129) appears only inside hero bands — one per page, framing the lead model render.
+Cal.com's marketing surface is a clean, friendly modern-SaaS interface — white canvas (`{colors.canvas}` — #ffffff) with black primary CTAs (`{colors.primary}` — #111111), custom **Cal Sans** display typography, and `{colors.surface-card}` (#f5f5f5) light-gray cards holding product UI fragments. The system reads as confidently engineered without trying to impress — every band has clear hierarchy, generous whitespace, and a single primary action.
 
-Type runs BMW's licensed **BMW Type Next Latin** at two weights: heavy 700 (display + button + nav) and Light 300 (body + secondary copy). That contrast — heavy display next to thin paragraph — is the editorial signature, channeling the brand's "European-engineered" voice. Weight 500 is deliberately absent; weight 400 only appears on caption and nav-link in neutral utility contexts.
+Type voice splits cleanly into two roles: **Cal Sans** (the brand's custom geometric display face — used for h1, h2, h3, and hero headlines) and **Inter** (used for everything else — body, buttons, nav, captions). Cal Sans uses weight 600 with negative letter-spacing (-0.5px to -2px depending on size) — it feels modern, slightly condensed, distinctly Cal.com.
 
-The brand action color, **BMW corporate blue** (`{colors.primary}` — #1c69d4), works alone across every primary CTA — buttons are **rectangular, 0px corner**, with white type. The site rotates a blue-button + dark-navy-hero combination across page rhythm. The M tricolor stripe (`{colors.m-blue-light}` → `{colors.m-blue-dark}` → `{colors.m-red}`) only appears in motorsport contexts and as M-model badges/dividers — never in the corporate site's main language.
+Component voltage comes from **product UI fragments shown directly inside cards** — calendar widgets, scheduling forms, automation diagrams, integration tiles. Cal.com doesn't paint marketing illustrations of the product; it shows the actual product chrome at small scale embedded in the marketing flow.
 
-The configuration and reservation flows add a dealer-side inventory UI on top of the same system — filter chips, model cards, price tables — but typography and color stay identical; only density goes up.
+The footer flips to `{colors.surface-dark}` (#101010) — a deep near-black that visually closes every long-scroll page. The footer is the only dark surface in the system; everything above stays white-with-light-gray-cards.
 
 **Key Characteristics:**
-- Light `{colors.canvas}` is the base surface; dark navy `{colors.surface-dark}` appears only inside hero bands — page rhythm relies on contrast.
-- BMW corporate blue (`{colors.primary}` — #1c69d4) acts as the single primary action color.
-- BMW Type Next Latin: weight 700 display against weight 300 body is the signature.
-- Buttons are **rectangular, 0px radius** — corporate dialect, distinct from M's sportier radii.
-- Model cards run as 4-up or 5-up grids with no hairline border or only minimal border — just white plate + photo + title.
-- Photography (model renders) sits in environment, no shadow — depth comes entirely from color-block contrast.
-- M tricolor stripe appears only in M-model contexts — not part of the corporate language.
-- Section rhythm holds at `{spacing.section}` (80px) for every major band.
+- White canvas with black primary CTA (`{colors.primary}` — #111111). Buttons are `{rounded.md}` (8px) with confident weight-600 labels. Standard friendly-SaaS button.
+- Custom `Cal Sans` display typeface for headlines (substituted with Inter weight 600 here). Negative letter-spacing on display sizes — geometric, precise, slightly condensed.
+- Light-gray card surfaces (`{colors.surface-card}` — #f5f5f5) for feature cards, testimonials, and pricing tiers (non-featured). The featured pricing tier flips to `{colors.surface-dark}` (the only dark card on light pages).
+- Product UI fragments embedded directly in cards — Cal.com shows real schedule pickers, calendar widgets, integration grids inside its marketing cards. Brand voltage from real product chrome at small scale.
+- Nav-pill-group (`{component.nav-pill-group}`) — a small pill-radius wrapper around grouped nav segments (e.g., the sub-nav switcher between product views). The pill wrapper is one of the system's signature interactive components.
+- Avatars are circular (`{rounded.full}`), 36px diameter, used in testimonial rows and team-listing surfaces.
+- Footer is dark navy (`{colors.surface-dark}` — #101010) with light text (`{colors.on-dark-soft}` — #a1a1aa). The dark footer closes every page even though the body above is white.
+- Spacing rhythm is `{spacing.section}` (96px) between major bands — tight enough to feel modern-SaaS but generous enough to breathe.
+- Border radius is hierarchical: `{rounded.md}` (8px) for buttons + inputs, `{rounded.lg}` (12px) for content cards, `{rounded.xl}` (16px) for the hero app-mockup container, `{rounded.pill}` for nav-pill-group + badges, `{rounded.full}` for avatars + icon buttons.
 
 ## Colors
 
 ### Brand & Accent
-- **BMW Blue (Primary)** (`{colors.primary}` — #1c69d4): The single brand action color. All primary CTAs, "Learn More" link prefixes (blue text), nav-link active state. Press shifts to `{colors.primary-active}` (#0653b6).
-- **M Blue Light** (`{colors.m-blue-light}` — #0066b1) + **M Blue Dark** (`{colors.m-blue-dark}` — #1c69d4) + **M Red** (`{colors.m-red}` — #e22718): The M tricolor stripe — appears on the corporate site only on M-model pages and the "M" badge. Never as CTA colors.
+- **Primary** (`{colors.primary}` — #111111): The dominant action color. All primary CTAs, h1/h2 display type. Press state shifts to `{colors.primary-active}` (#242424).
+- **Brand Accent** (`{colors.brand-accent}` — #3b82f6): Used sparely on inline links and on a small badge / "Customer story" highlight. Cal.com is a near-monochrome brand — the blue appears rarely.
+- **Badge Pastels** — A small pastel set for category badges and avatar fills: `{colors.badge-orange}` (#fb923c), `{colors.badge-pink}` (#ec4899), `{colors.badge-violet}` (#8b5cf6), `{colors.badge-emerald}` (#34d399). These appear on tag pills and small accent moments inside product UI fragments — never on hero CTAs.
 
 ### Surface
-- **Canvas** (`{colors.canvas}` — #ffffff): The default page surface.
-- **Surface Soft** (`{colors.surface-soft}` — #f7f7f7): Soft grey for the footer and sub-navigation bands.
-- **Surface Card** (`{colors.surface-card}` — #fafafa): The light plate behind a model card's photo block.
-- **Surface Strong** (`{colors.surface-strong}` — #ebebeb): A slightly heavier grey used as a section divider.
-- **Surface Dark** (`{colors.surface-dark}` — #1a2129): Dark navy for hero bands and large dark CTAs. Not pure black — carries a warm undertone.
-- **Surface Dark Elevated** (`{colors.surface-dark-elevated}` — #262e38): One step lighter, used for nested cards on top of the dark hero.
-
-### Hairlines
-- **Hairline** (`{colors.hairline}` — #e6e6e6): The 1px divider — input outline, configurator card outline, table separator.
-- **Hairline Strong** (`{colors.hairline-strong}` — #cccccc): A more visible 1px outline — disabled secondary buttons, emphasized table border.
+- **Canvas** (`{colors.canvas}` — #ffffff): The default page floor.
+- **Surface Soft** (`{colors.surface-soft}` — #f8f9fa): Nav-pill-group background, very-soft section dividers.
+- **Surface Card** (`{colors.surface-card}` — #f5f5f5): Feature cards, testimonial cards, badge pills, default avatar fills.
+- **Surface Strong** (`{colors.surface-strong}` — #e5e7eb): Hairline border alternative; disabled button background.
+- **Surface Dark** (`{colors.surface-dark}` — #101010): The footer background — the only dark surface on every page. Also used for the featured pricing tier card.
+- **Surface Dark Elevated** (`{colors.surface-dark-elevated}` — #1a1a1a): Used for nested cards inside the dark footer or featured pricing card.
+- **Hairline** (`{colors.hairline}` — #e5e7eb): The 1px border tone on light surfaces. Used on input borders, table dividers, content card outlines (sometimes).
+- **Hairline Soft** (`{colors.hairline-soft}` — #f3f4f6): A barely-visible divider used between sections that share the white canvas.
 
 ### Text
-- **Ink** (`{colors.ink}` — #262626): All display and primary text. Not pure black — soft against photography.
-- **Body** (`{colors.body}` — #3c3c3c): Default running text.
-- **Body Strong** (`{colors.body-strong}` — #1a1a1a): Emphasized paragraphs and lead text.
-- **Muted** (`{colors.muted}` — #6b6b6b): Footer links, breadcrumbs, captions.
-- **Muted Soft** (`{colors.muted-soft}` — #9a9a9a): Disabled text, fine-print legal.
-- **On Primary** (`{colors.on-primary}` — #ffffff): White text on a blue button.
-- **On Dark** (`{colors.on-dark}` — #ffffff): White text on a dark hero band.
-- **On Dark Soft** (`{colors.on-dark-soft}` — #bbbbbb): A slightly muted white for secondary text on dark bands.
+- **Ink** (`{colors.ink}` — #111111): All headlines and primary text.
+- **Body** (`{colors.body}` — #374151): Default running-text color.
+- **Muted** (`{colors.muted}` — #6b7280): Secondary text — sub-headings, breadcrumbs, footer body.
+- **Muted Soft** (`{colors.muted-soft}` — #898989): Tertiary text — captions, fine-print, copyright lines.
+- **On Primary / On Dark** (`{colors.on-primary}` / `{colors.on-dark}` — #ffffff): Text on primary buttons and dark footer.
+- **On Dark Soft** (`{colors.on-dark-soft}` — #a1a1aa): Footer body text — slightly muted white for the link rows.
 
 ### Semantic
-- **Success** (`{colors.success}` — #22c55e): Confirmation messages and "available" indicators.
+- **Success** (`{colors.success}` — #10b981): Confirmation states, success badges in product UI.
 - **Warning** (`{colors.warning}` — #f59e0b): Warning callouts.
-- **Error** (`{colors.error}` — #dc2626): Validation errors.
+- **Error** (`{colors.error}` — #ef4444): Validation errors.
 
 ## Typography
 
 ### Font Family
-The system runs **BMW Type Next Latin** in two cuts: regular (display + UI labels) and **BMW Type Next Latin Light** (body + secondary copy). Fallback stack: `system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`.
+The system runs **Cal Sans** for display + brand wordmark and **Inter** for everything else. Cal Sans is Cal.com's custom geometric display typeface — slightly condensed, weight 600, negative letter-spacing. Inter handles body, buttons, navigation, captions, and tabular code blocks. The fallback stack walks `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` for both families.
 
-The display/body split is functional:
-- BMW Type Next Latin (700) → display headlines, button labels, nav links
-- BMW Type Next Latin Light (300) → paragraphs, descriptive copy
-- BMW Type Next Latin (400) → caption, neutral nav-link contexts
-
-This three-way split mirrors BMW M's — corporate and the M sub-brand share the same typographic DNA; only the weight/size ratios differ.
+The split is functional:
+- Cal Sans (display, 600 weight, -0.5 to -2px tracking) — h1, h2, h3
+- Inter (body + UI, 400-600 weight, 0 letter-spacing) — paragraphs, labels, buttons, nav
 
 ### Hierarchy
 
 | Token | Size | Weight | Line Height | Letter Spacing | Use |
 |---|---|---|---|---|---|
-| `{typography.display-xl}` | 64px | 700 | 1.05 | 0 | Hero h1 ("iX3", model name) |
-| `{typography.display-lg}` | 48px | 700 | 1.1 | 0 | Section heads |
-| `{typography.display-md}` | 32px | 700 | 1.15 | 0 | Sub-section heads |
-| `{typography.display-sm}` | 24px | 700 | 1.25 | 0 | CTA-band headlines |
-| `{typography.title-lg}` | 20px | 700 | 1.3 | 0 | Card group titles |
-| `{typography.title-md}` | 18px | 700 | 1.4 | 0 | Model card title, intro paragraphs |
-| `{typography.title-sm}` | 16px | 700 | 1.4 | 0 | Inventory card title, list label |
-| `{typography.body-md}` | 16px | 300 (Light) | 1.55 | 0 | Default body — BMW Type Next Latin Light |
-| `{typography.body-sm}` | 14px | 300 (Light) | 1.55 | 0 | Footer body, fine-print |
-| `{typography.caption}` | 12px | 400 | 1.4 | 0.5px | Photo captions, meta |
-| `{typography.label-uppercase}` | 13px | 700 | 1.3 | 1.5px | "LEARN MORE" inline links, category tabs |
-| `{typography.button}` | 14px | 700 | 1.0 | 0.5px | Standard CTA button label |
-| `{typography.nav-link}` | 14px | 400 | 1.4 | 0.3px | Top-nav menu items |
+| `{typography.display-xl}` | 64px | 600 | 1.05 | -2px | Homepage h1 ("The better way to schedule your meetings") — Cal Sans |
+| `{typography.display-lg}` | 48px | 600 | 1.1 | -1.5px | Section heads ("Your all-purpose scheduling app") — Cal Sans |
+| `{typography.display-md}` | 36px | 600 | 1.15 | -1px | Sub-section heads, card titles — Cal Sans |
+| `{typography.display-sm}` | 28px | 600 | 1.2 | -0.5px | CTA-band heads, pricing tier prices — Cal Sans |
+| `{typography.title-lg}` | 22px | 600 | 1.3 | -0.3px | Pricing plan names — Inter |
+| `{typography.title-md}` | 18px | 600 | 1.4 | 0 | Feature card titles, intro paragraphs |
+| `{typography.title-sm}` | 16px | 600 | 1.4 | 0 | Small card titles, list labels |
+| `{typography.body-md}` | 16px | 400 | 1.5 | 0 | Default running-text |
+| `{typography.body-sm}` | 14px | 400 | 1.5 | 0 | Footer body, fine-print |
+| `{typography.caption}` | 13px | 500 | 1.4 | 0 | Badge labels, captions |
+| `{typography.code}` | 14px | 400 | 1.5 | 0 | Code snippets, API examples — JetBrains Mono |
+| `{typography.button}` | 14px | 600 | 1.0 | 0 | Standard button labels |
+| `{typography.nav-link}` | 14px | 500 | 1.4 | 0 | Top-nav menu items |
 
 ### Principles
-- The **700/300 contrast** is the editorial signature. Weight 500 is absent from the system.
-- **No negative letter-spacing** — BMW Type Next Latin works on a wide body, so tracking stays at default. Apple/Cal.com-style tightening reads off-brand here.
-- **UPPERCASE inline links** — "LEARN MORE"-style CTAs run uppercase with 1.5px tracking. The "machined precision" voice.
-- **Weight 400 lives in a narrow lane** — only caption and nav-link, both neutral utility roles.
+Cal Sans is the brand voice — every display headline uses it. Inter handles the supporting type. The boundary is strict: never put body copy in Cal Sans, never put a display headline in Inter. Cal Sans without negative letter-spacing reads as off-brand — the -0.5 to -2px tracking is part of the voice.
+
+Display weight stays at 600 across all sizes — never 700, never 500. The middle weight is what makes Cal Sans feel modern and confident without becoming bombastic.
 
 ### Note on Font Substitutes
-BMW Type Next Latin is a licensed BMW typeface. Open-source alternatives:
-- **Inter** (variable) — close match at weight 700/300. Leave letter-spacing at 0.0em.
-- **Saira Condensed** — for a slightly more compressed BMW Type feel.
+If Cal Sans is unavailable, **Inter** at weight 600 with -0.04em letter-spacing is a usable approximation. The geometric character of Cal Sans differs from Inter's humanist forms, but the substitution preserves the weight + tracking signature. **Manrope** at weight 700 is another close alternative.
 
 ## Layout
 
 ### Spacing System
-- **Base unit:** 8px.
-- **Tokens:** `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 16px · `{spacing.lg}` 24px · `{spacing.xl}` 32px · `{spacing.xxl}` 48px · `{spacing.section}` 80px.
-- **Section padding:** `{spacing.section}` (80px) for every major editorial band.
-- **Card internal padding:** `{spacing.lg}` (24px) for model and feature cards.
+- **Base unit:** 4px.
+- **Tokens:** `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 16px · `{spacing.lg}` 24px · `{spacing.xl}` 32px · `{spacing.xxl}` 48px · `{spacing.section}` 96px.
+- **Section padding:** `{spacing.section}` (96px) — the universal vertical rhythm between editorial bands.
+- **Card internal padding:** `{spacing.xl}` (32px) for feature cards and pricing tier cards; `{spacing.lg}` (24px) for testimonial and product-mockup cards.
+- **Gutters:** `{spacing.lg}` (24px) between cards in 3-up grids; `{spacing.md}` (16px) inside footer columns.
 
 ### Grid & Container
-- **Max content width:** ~1440px center-aligned.
-- **Editorial body:** A single 12-column grid.
-- **Model card grids:** 4-up or 5-up at desktop, 2-up at tablet, 1-up on mobile.
-- **Configurator inventory grids:** 3-up filter row + 4-up vehicle cards, dense layout.
+- **Max content width:** ~1200px centered on marketing pages.
+- **Editorial body:** Single 12-column grid; hero band often uses 7/5 split (h1 left, app mockup card right).
+- **Feature card grids:** 3-up at desktop, 2-up at tablet, 1-up at mobile.
+- **Pricing grid:** 4-up at desktop, 2-up at tablet, 1-up at mobile.
+- **Footer:** 4-column link list at desktop, wrapping to 2-up at tablet, 1-up at mobile.
 
 ### Whitespace Philosophy
-BMW's whitespace strategy is tighter than BMW M's motorsport-aerated grenadier — the corporate side is more utility-driven. Section rhythm is 80px (not M's 96px). Card padding is 24px (not M's 32px). The page is denser, more dealership-functional.
+Cal.com uses generous but not excessive whitespace — section padding sits at 96px (modern-SaaS standard), and card internal padding stays at 32px. The rhythm is calibrated for fast scanning: every band has a single h1 + h2 + supporting cards, never densely packed lists. The result reads as confident-not-shouting.
 
 ## Elevation & Depth
 
 | Level | Treatment | Use |
 |---|---|---|
-| Flat | No shadow, no border | Body, top nav, footer, hero bands |
-| Soft hairline | 1px `{colors.hairline}` border | Configurator option tile, table divider |
-| Card surface | `{colors.surface-card}` background — no shadow | Model card photo plate |
-| Photographic | Edge-to-edge photography | Hero band, model renders |
+| Flat | No shadow, no border | Body sections, top nav, hero bands |
+| Soft hairline | 1px `{colors.hairline}` border | Inputs, table dividers, occasionally on cards |
+| Card surface | `{colors.surface-card}` background — no shadow | Feature cards, testimonials |
+| Subtle drop shadow | Faint shadow at low alpha | Pricing tier cards, hover-elevated states (the system uses `0 1px 2px rgba(0,0,0,0.05)` and `0 4px 12px rgba(0,0,0,0.08)`) |
+| Featured tier | `{colors.surface-dark}` background, no shadow needed | The featured pricing tier inverts to dark surface — color contrast does the elevation work |
 
-The system never uses a drop shadow. Depth comes entirely from (a) color-block contrast (light canvas vs dark hero) and (b) photographic subject + lighting.
+The elevation philosophy is **soft and modern** — small drop shadows on elevated cards, color-block contrast for emphasis. No heavy shadows, no neumorphism, no glassmorphism.
 
 ### Decorative Depth
-- **`m-stripe-divider`** — a 4px-tall horizontal tricolor stripe (`{colors.m-blue-light}` → `{colors.m-blue-dark}` → `{colors.m-red}`). Only in M-model contexts, motorsport badges, or as an M-related section divider. Not part of the main corporate flow.
-- **Photographic depth** — full-bleed vehicle photography (lighting + subject) does the work chrome would otherwise do.
+- Calendar widgets and product UI fragments embedded inside marketing cards carry their own internal shadows from the product UI itself — these are not system tokens, they're product chrome shown as content.
+- Avatar circles in testimonial sections sometimes carry pastel fill colors (`{colors.badge-orange}`, `{colors.badge-pink}`, etc.) — adds a small chromatic flourish without breaking the monochrome brand voice.
 
 ## Shapes
 
@@ -400,101 +125,98 @@ The system never uses a drop shadow. Depth comes entirely from (a) color-block c
 
 | Token | Value | Use |
 |---|---|---|
-| `{rounded.none}` | 0px | Every button, card, input, configurator chip — the dominant radius |
-| `{rounded.xs}` | 2px | Very small badges, very rare |
-| `{rounded.sm}` | 4px | Small inline button (rare) |
-| `{rounded.md}` | 8px | Mobile-only collapse cards (rare) |
-| `{rounded.lg}` | 12px | Very rare — modal/dialog corners |
-| `{rounded.pill}` | 9999px | Filter chips in some contexts (rare) |
-| `{rounded.full}` | 9999px / 50% | Avatar, circular icon button |
-
-The radius hierarchy is binary: **rectangular for everything, circular only for icon buttons.** A clear departure from the soft-cornered SaaS dialect of Apple or Cal.com — closer to BMW corporate-automotive's "engineered precision" voice.
+| `{rounded.xs}` | 4px | Almost no use — reserved for badge accents |
+| `{rounded.sm}` | 6px | Small inline buttons, dropdown items |
+| `{rounded.md}` | 8px | Standard CTA buttons, text inputs, category tabs |
+| `{rounded.lg}` | 12px | Content cards (feature cards, testimonial cards, pricing tier cards) |
+| `{rounded.xl}` | 16px | Hero app-mockup card (a slightly larger radius for the marquee component) |
+| `{rounded.pill}` | 9999px | Nav-pill-group, badge pills |
+| `{rounded.full}` | 9999px / 50% | Avatars, icon buttons |
 
 ### Photography Geometry
-- Hero photography is full-bleed at 16:9 or 21:9 cinematic ratio.
-- Model card photos sit at 16:10, edge-to-edge with `{rounded.none}` corners.
-- Configurator vehicle renders sit on a white studio background, full silhouette visible.
+Avatar photos use `{rounded.full}` (perfect circles) at 36px or 40px. Product UI fragments inside marketing cards retain their native chrome (which often has its own internal radii — e.g., calendar grid cells, button rows). Hero illustration zones use 16:9 or 4:3 ratios with `{rounded.xl}` corners.
 
 ## Components
 
 ### Top Navigation
 
-**`top-nav`** — A white sticky nav bar pinned to the top of the page. 64px tall, `{colors.canvas}` background. Left: BMW circular badge logo; center: primary horizontal menu (Models, Next Generation, Pre-Owned, Dealers, Test Drive); right: cart icon, language picker, profile. Menu items render in `{typography.nav-link}` (14px / 400 / 0.3px tracking).
+**`top-nav`** — White nav bar pinned to the top of every page. 64px tall, `{colors.canvas}` background. Carries the Cal.com wordmark + logo at left (the lowercase "Cal.com" with the brand circle), primary horizontal menu (Product, Solutions, Resources, Pricing, Enterprise) center, right-side cluster with "Sign in" text-link, "Sign up free" `{component.button-primary}`, and a sometimes-visible language selector. Menu items in `{typography.nav-link}` (Inter 14px / 500).
+
+**`nav-pill-group`** — A small pill-radius wrapper around 2-3 sub-nav segments (e.g., the product-mode switcher between "Personal" / "Teams" / "Enterprise"). Background `{colors.surface-soft}` with internal padding 6px, rounded `{rounded.pill}`. Active segment renders as a white-canvas pill with a subtle drop shadow inside the wrapper. The pill-in-pill treatment is one of Cal.com's signature interactive components.
 
 ### Buttons
 
-**`button-primary`** — The signature primary CTA. Background `{colors.primary}` (BMW Blue #1c69d4), text `{colors.on-primary}`, type `{typography.button}` (BMW Type Next Latin 14px / 700 / 0.5px tracking), padding 14px × 32px, height 48px, rounded `{rounded.none}` (0px — rectangular). Press state: `button-primary-active` shifts to `{colors.primary-active}`.
+**`button-primary`** — The signature primary CTA. Background `{colors.primary}` (#111111), text `{colors.on-primary}`, type `{typography.button}` (Inter 14px / 600), padding 12px × 20px, height 40px, rounded `{rounded.md}` (8px). Active state `button-primary-active` shifts to `{colors.primary-active}` (#242424).
 
-**`button-secondary`** — A white button with a hairline outline. Background `{colors.canvas}`, text `{colors.ink}`, 1px `{colors.hairline-strong}` border, same padding + height + radius.
+**`button-secondary`** — White button with hairline outline. Background `{colors.canvas}`, text `{colors.ink}`, 1px hairline border, same padding + height + radius as primary.
 
-**`button-secondary-on-dark`** — Used over a dark hero band. Background transparent, text `{colors.on-dark}`, 1px `{colors.on-dark}` border, same rectangular shape.
+**`button-icon-circular`** — 36 × 36px circular icon button. Background `{colors.canvas}`, hairline border, ink-color icon. Used for share, "view more", carousel arrows.
 
-**`button-text-link`** — An inline UPPERCASE letter-spaced link. No background, text `{colors.ink}`, type `{typography.label-uppercase}` (13px / 700 / 1.5px tracking). Reads as "LEARN MORE", terminated by a `›` chevron.
+**`button-text-link`** — Inline text button, no background. Used for "Sign in" in the top nav and inline CTA links inside cards.
 
-**`text-link`** — An inline link inside body copy. `{colors.ink}` text, no underline by default; underlines per context.
+**`text-link`** — Inline body links in `{colors.ink}` (the brand keeps inline links monochrome). Underlined on hover (not documented per the no-hover policy, but mentioned for context).
 
 ### Cards & Containers
 
-**`hero-band-dark`** — Full-width dark navy hero. Background `{colors.surface-dark}`, text `{colors.on-dark}`, vertical padding `{spacing.section}` (80px). Centered: model name in `{typography.display-xl}` (64px / 700) + sub-headline + vehicle render (right-aligned or below). A single `{component.button-primary}` (blue) or `{component.button-secondary-on-dark}`.
+**`hero-band`** — White-canvas hero with a 7-5 grid: h1 + sub-headline + button row on the left, `{component.hero-app-mockup-card}` on the right. Vertical padding `{spacing.section}` (96px).
 
-**`hero-photo-band`** — A light-canvas model showcase band. Background `{colors.canvas}`, text `{colors.ink}`. The vehicle render takes the wide area; right or below, a headline + two link CTAs + sub-tagline.
+**`hero-app-mockup-card`** — A larger product-UI mockup card showing the actual Cal.com booking widget with calendar grid, time slots, and a primary "Confirm" button inside. Background `{colors.canvas}`, 1px hairline border, rounded `{rounded.xl}` (16px), subtle drop shadow. Used as the hero's right-side artifact.
 
-**`model-card`** — Used in 4-up or 5-up model card grids on the homepage ("BMW iX3", "BMW iX", "BMW 5 Series"). Background `{colors.canvas}`, rounded `{rounded.none}`, padding `{spacing.lg}` (24px). Contents: model render at the top (`{component.model-card-photo}` on `{colors.surface-card}`), model name in `{typography.title-md}` (18px / 700) below, a one-line tagline in `{typography.body-sm}` (14px / 300), and a `{component.button-text-link}` ("LEARN MORE ›").
+**`feature-card`** — Used in 3-up feature grids ("With us, appointment scheduling is easy"). Background `{colors.surface-card}` (#f5f5f5), rounded `{rounded.lg}` (12px), internal padding `{spacing.xl}` (32px). Carries a small icon at top, an `{typography.title-md}` headline, and a body description in `{typography.body-md}`.
 
-**`model-card-photo`** — The card's photo plate. Background `{colors.surface-card}` (#fafafa — soft grey), rounded `{rounded.none}`, vehicle render in full silhouette. Zero padding — the photo runs edge-to-edge.
+**`feature-icon-card`** — A simpler card variant used in 4-up feature grids on lower-density bands. Background `{colors.canvas}` with hairline border, rounded `{rounded.lg}`, padding `{spacing.lg}` (24px). Carries a small icon, `{typography.title-sm}` title, short description.
 
-**`feature-photo-card`** — A feature/lifestyle card. Background `{colors.canvas}`, padding `{spacing.lg}`. 16:9 photo at the top, `{typography.title-md}` headline + body excerpt below.
+**`product-mockup-card`** — A card showing actual Cal.com product UI fragments (workflow editor, calendar grid, integration grid, automation flow). Background `{colors.canvas}`, rounded `{rounded.lg}`, padding `{spacing.lg}` (24px). The product UI inside has its own internal chrome — these cards display the product, they don't decorate around it.
 
-**`spec-cell`** — A technical spec cell (model detail page). Transparent background, separated by hairline dividers. Value on top (`{typography.display-sm}` 24px / 700), label below (`{typography.label-uppercase}`).
+**`testimonial-card`** — Used in customer-quote grids. Background `{colors.surface-card}`, rounded `{rounded.lg}`, padding `{spacing.lg}` (24px). Top row carries a `{component.avatar-circle}` + name + role; below sits the testimonial quote in `{typography.body-md}`.
 
-### Inventory & Configurator
+**`pricing-tier-card`** — Standard tier card. Background `{colors.canvas}`, rounded `{rounded.lg}`, padding `{spacing.xl}` (32px). Carries the plan name in `{typography.title-lg}`, price in `{typography.display-sm}`, feature checklist in `{typography.body-md}`, and a `{component.button-primary}` at the bottom.
 
-**`inventory-card`** — One card per vehicle on the dealer inventory page. Background `{colors.canvas}`, padding `{spacing.md}` (16px), rounded `{rounded.none}`. Vehicle photo on top, model + variant name + price + "View" link below.
-
-**`filter-chip`** + **`filter-chip-active`** — Inventory filter chips (model, year, price range). Inactive: background `{colors.canvas}`, 1px `{colors.hairline-strong}` border, text `{colors.ink}`, type `{typography.caption}`. Active: background `{colors.ink}`, text `{colors.on-dark}`. Padding 8px × 14px, radius `{rounded.none}`.
-
-**`configurator-option-tile`** + **`configurator-option-tile-selected`** — Configurator selection cell (color, wheels, upholstery). Inactive: background `{colors.canvas}`, 1px hairline. Selected: 2px `{colors.primary}` border. Padding 16px × 24px, radius `{rounded.none}`.
+**`pricing-tier-card-featured`** — The featured tier (typically "Teams"). Background flips to `{colors.surface-dark}` (#101010), text inverts to `{colors.on-dark}`. The dark surface IS the featured-tier signal — no accent border, no badge, no scale shift.
 
 ### Inputs & Forms
 
-**`text-input`** — Standard text input. Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.body-md}`, rounded `{rounded.none}` (0px), padding 14px × 16px, height 48px, 1px hairline border. On focus, the border thickens to ink.
+**`text-input`** — Standard text input. Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.body-md}`, rounded `{rounded.md}` (8px), padding 10px × 14px, height 40px. 1px hairline border in `{colors.hairline}`.
 
-**`cookie-consent-card`** — Cookie banner. Background `{colors.canvas}`, 1px hairline, padding `{spacing.lg}` (24px), `{typography.body-sm}` (14px / 300 — Light even in legal copy).
+**`text-input-focused`** — Focus state. Border thickens or shifts to `{colors.ink}` for emphasis.
 
-### Tabs / Tags
+### Tags / Badges
 
-**`category-tab`** + **`category-tab-active`** — Category sub-nav. Inactive: transparent + `{colors.muted}` UPPERCASE label. Active: transparent + `{colors.ink}` UPPERCASE label + 2px ink underline. 12px vertical padding, no horizontal radius.
+**`badge-pill`** — Small pill label used for category tags ("Product", "Article", "New") and pastel-fill avatar substitutes. Background `{colors.surface-card}` or one of the badge pastels (`{colors.badge-orange}`, `{colors.badge-pink}`, etc.), text `{colors.ink}`, type `{typography.caption}` (13px / 500), rounded `{rounded.pill}`, padding 4px × 12px.
 
-### Brand Signature
+**`avatar-circle`** — 36px diameter, rounded `{rounded.full}`. Either holds a photo or a pastel fill with initials in `{typography.caption}`.
 
-**`m-stripe-divider`** — A 4px-tall horizontal tricolor stripe (`{colors.m-blue-light}` → `{colors.m-blue-dark}` → `{colors.m-red}`). Only in M-model contexts, motorsport badges, or as an M-related section divider. Absent from the corporate main flow; on M-model detail pages and the M Performance badge it plays an inline divider role.
+**`rating-stars`** — Inline star rating in `{colors.badge-orange}` (#fb923c). Used near testimonial avatars to display a 5-star satisfaction score.
+
+### Tab / Filter
+
+**`category-tab`** + **`category-tab-active`** — Used inside the nav-pill-group. Inactive: transparent background, `{colors.muted}` text. Active: `{colors.canvas}` background, `{colors.ink}` text, subtle drop shadow inside the pill-group wrapper. Padding 8px × 14px, rounded `{rounded.md}`.
 
 ### CTA / Footer
 
-**`cta-band-photo`** — A pre-footer "Discover the New iX3"-style band. Background `{colors.surface-dark}` with a full-bleed vehicle photo. Centered headline in `{typography.display-md}` (32px / 700) + a single `{component.button-secondary-on-dark}`. 80px padding.
+**`cta-band-light`** — A pre-footer "Smarter, simpler scheduling" CTA card. Background `{colors.surface-card}`, rounded `{rounded.lg}`, padding `{spacing.xxl}` (48px). Carries an h2 in `{typography.display-sm}`, a sub-line, and a `{component.button-primary}` centered.
 
-**`footer`** — The closing soft-grey footer. Background `{colors.surface-soft}` (#f7f7f7 — not pure white — soft grey), text `{colors.body}`. A 4-column link list: Models / Services / Dealers / About. Vertical padding 64px. Below, a copyright line in `{typography.body-sm}` with `{colors.muted}`.
+**`footer`** — Dark navy footer that closes every page. Background `{colors.surface-dark}` (#101010), text `{colors.on-dark-soft}`. 4-column link list at desktop covering Product / Solutions / Company / Resources. Vertical padding 64px. The Cal.com wordmark sits at the top-left in `{colors.on-dark}`. The footer is the only dark surface on every page — the deliberate inversion visually closes the page.
 
 ## Do's and Don'ts
 
 ### Do
-- Sit every page on `{colors.canvas}` (pure white); reserve `{colors.surface-dark}` for hero bands only.
-- Pair primary CTAs with `{colors.primary}` (BMW Blue) + `{colors.on-primary}` white text + `{rounded.none}` 0px corners — the corporate signature.
-- Set display headlines in BMW Type Next Latin 700 and body in Light 300. The contrast is non-negotiable.
-- Use UPPERCASE letter-spaced links like "LEARN MORE" as inline CTAs.
-- Place the model card photo on `{colors.surface-card}` with the title beneath — the standard BMW corporate pattern.
-- Hold section rhythm at `{spacing.section}` (80px) — tighter than BMW M's 96px.
-- Reserve the M tricolor stripe for M-model contexts and motorsport dividers.
+- Reserve `{colors.primary}` (#111111) for primary CTAs and h1/h2 type. Cal.com's button is near-black, not blue.
+- Use Cal Sans for every display headline. Pair with Inter body. Never blur the boundary.
+- Apply negative letter-spacing on display sizes (-0.5 to -2px). Cal Sans without it reads as off-brand.
+- Use `{component.feature-card}` (light gray) and `{component.product-mockup-card}` (white with chrome) deliberately — the gray cards signal "abstract feature claim", white cards signal "look at the actual product".
+- Embed real product UI fragments inside marketing cards. Don't paint marketing illustrations of the product when you can show the product itself.
+- Keep avatar circles at 36px, perfect circles, sometimes with pastel fills. Avatars are the only place where badge pastels appear.
+- Use `{component.nav-pill-group}` for grouped sub-nav segments. The pill-in-pill treatment is signature.
+- End every page with the dark footer. The light-to-dark transition is part of the editorial rhythm.
 
 ### Don't
-- Don't add a brand color other than blue — BMW Blue is the only primary action color.
-- Don't use pill or rounded buttons — `{rounded.none}` (0px) rectangular IS the brand button.
-- Don't drop display weight to 500 — the system uses 700 / 400 / 300; 500 is absent.
-- Don't bold body type — Light 300 is the BMW corporate editorial voice.
-- Don't add drop shadows to cards — depth comes from photo + color-block contrast.
-- Don't repeat the same surface mode across two consecutive bands — light → dark hero → light → light feature → dark CTA → light footer rotation is required.
-- Don't use the M tricolor stripe as a CTA fill — divider/accent role only.
-- Don't mix languages in a single page — UI language must stay consistent.
+- Don't use accent colors (`{colors.brand-accent}`, badge pastels) on primary CTAs. The system is monochrome at the action layer.
+- Don't bold display weight beyond 600. Cal Sans at 700 reads as bombastic.
+- Don't use rounded radius beyond `{rounded.xl}` (16px) on cards. Larger radii read as consumer-app, not professional booking software.
+- Don't put dark surface cards anywhere except the footer and the featured pricing tier. The dark surface is a deliberate, scarce signal.
+- Don't repeat the same surface mode in two consecutive bands. Cal.com's pacing alternates white → light-gray → white → product-mockup-card → white → dark-footer.
+- Don't add hover state styling beyond what the system already encodes — primary darkens on press; nothing else changes.
 
 ## Responsive Behavior
 
@@ -502,43 +224,46 @@ The radius hierarchy is binary: **rectangular for everything, circular only for 
 
 | Name | Width | Key Changes |
 |---|---|---|
-| Mobile | < 768px | Hamburger nav; hero h1 64→40px; model card grid 1-up; configurator filter chips 2-up; footer 4 col → 1 col |
-| Tablet | 768–1024px | Top nav narrows, secondary menu hides under "More"; model card 2-up; inventory 2-up |
-| Desktop | 1024–1440px | Full top-nav; 4-up or 5-up model card grid; inventory 3-up; full configurator UI |
-| Wide | > 1440px | Same as desktop, content fixed at 1440px; gutters absorb the rest |
+| Mobile | < 768px | Hamburger nav; hero h1 64→32px; hero-app-mockup-card stacks below content; feature grids 1-up; pricing 1-up; footer 4 cols → 1 |
+| Tablet | 768–1024px | Top nav stays horizontal but tightens; nav-pill-group wraps; feature cards 2-up; pricing 2-up |
+| Desktop | 1024–1440px | Full top-nav with all menu items; 3-up feature cards; 4-up pricing tiers |
+| Wide | > 1440px | Same as desktop with more outer breathing room; max content width caps at 1200px |
 
 ### Touch Targets
-- `{component.button-primary}` minimum 48 × 48px — above WCAG AAA (44 × 44).
-- `{component.text-input}` height 48px.
-- Category tabs run with 12px vertical padding, giving an effective tap area > 44px.
+- `{component.button-primary}` at minimum 40 × 40px.
+- `{component.button-icon-circular}` at exactly 36 × 36 — slightly under WCAG's 44 × 44 but the centered icon and full-circle silhouette compensate.
+- `{component.text-input}` height is 40px.
+- `{component.category-tab}` rendered inside nav-pill-group has 8 × 14 padding; effective tap area meets 44px+ with the surrounding pill.
 
 ### Collapsing Strategy
-- The top nav collapses to a hamburger below 768px; the menu opens as a full-screen sheet.
-- The hero band's internal layout drops to a single column.
-- Model card grid 4-up/5-up → 2-up → 1-up.
-- The configurator filter chip row scrolls horizontally on mobile.
-- The M tricolor stripe stays at 4px height across every breakpoint.
+- Top nav collapses to hamburger at < 768px; menu opens as a full-screen sheet.
+- Hero band's 7-5 grid collapses to single-column on mobile — h1 + sub-head + buttons first, then the app-mockup card below.
+- Feature grids reduce columns rather than scaling cards down.
+- Pricing tier cards collapse 4 → 2 → 1; featured-tier dark surface stays visually distinct at every breakpoint.
+- Nav-pill-group wraps to multi-row on tablet if the segments don't fit horizontally.
+- Avatar + testimonial card layouts stay grid-aligned at every breakpoint.
 
 ### Image Behavior
-- Model renders scale at every breakpoint while preserving native aspect ratios.
-- Hero photography may shift to a more vertical crop on mobile (art direction).
-- Inventory vehicle photos may move from 16:9 to 4:3 on mobile.
+- Product UI fragments inside cards retain native aspect ratios; the cards themselves resize.
+- Avatar photos crop to circles at every breakpoint.
+- Hero app-mockup card scales proportionally on mobile — the calendar grid stays legible.
 
 ## Iteration Guide
 
-1. Focus on a single component. Reference its YAML key directly (`{component.model-card}`, `{component.button-primary}`).
-2. New components default to `{rounded.none}` (0px). Use `{rounded.full}` only for circular icon buttons.
-3. Variants (`-active`, `-disabled`, `-selected`) live as separate entries inside the `components:` block.
-4. `{token.refs}` everywhere — never inline hex.
-5. Hover state is never documented. Only Default and Active/Pressed states.
-6. Display headlines stay BMW Type Next Latin 700; body stays Light 300; the trio is fixed.
-7. Keep UI strings in a single language — match the locale of the page.
+1. Focus on ONE component at a time. Reference its YAML key directly (`{component.feature-card}`, `{component.pricing-tier-card-featured}`).
+2. Variants of an existing component (`-active`, `-disabled`, `-focused`) live as separate entries in `components:`.
+3. Use `{token.refs}` everywhere — never inline hex.
+4. Never document hover. Default and Active/Pressed states only.
+5. Display headlines stay Cal Sans 600 with negative letter-spacing. Body stays Inter 400. The trinity does not blur.
+6. The dark footer is the only dark surface on most pages. Don't add other dark cards casually.
+7. When in doubt about emphasis: bigger Cal Sans before bolder Cal Sans.
 
 ## Known Gaps
 
-- BMW Type Next Latin is licensed to BMW and not published as a public web font; Inter at weights 700/300 is documented as the substitute.
-- Animation and transition timings (configurator color swap, model card hover-reveal) are out of scope here.
-- Form validation states beyond `{component.text-input}` focus were not extracted — error/success states would need a dedicated form page.
-- The dealer inventory sub-domain shares typography and color with the main corporate site; only UI density rises (filters, tables, prices).
-- A cookie consent overlay can occlude part of the hero — the lead hero band content may not be fully captured.
-- The M tricolor stripe appears infrequently on this corporate site; full motorsport context lives on the BMW M site.
+- The dembrandt frequency analyzer captured `Buttons: 0 variants` — Cal.com renders most CTAs as styled `<a>` link elements rather than `<button>` tags, which dembrandt's button selector doesn't capture. Button styles are documented from screenshot ground-truth + standard Cal Sans / Inter baselines.
+- Cal Sans is licensed to Cal.com and not available as a public web font; substitutes are documented in the typography section.
+- The badge pastel set (orange / pink / violet / emerald) is documented from observed avatar fill colors; exact hex values may shift seasonally.
+- Animation and transition timings (calendar slot picker, schedule confirmation, integration grid hover-reveal) are not in scope.
+- Form validation states beyond `{component.text-input-focused}` are not extracted — error / success states would need a sign-up or booking flow to confirm.
+- The actual booking widget surface (cal.com/{username}) is the product, not a marketing surface; its spec is out of scope.
+- Avatar photos in testimonial sections sometimes carry pastel circular fills with initials instead of photographs; both treatments coexist on the same page.

@@ -23,7 +23,12 @@ def run_attendance():
 
     # Load face cascade and recognizer
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-    recognizer = cv2.face.LBPHFaceRecognizer_create()
+    recognizer = cv2.face.LBPHFaceRecognizer_create(
+        radius=1,
+        neighbors=8,
+        grid_x=8,
+        grid_y=8
+    )
     recognizer.read(model_path)
 
     # Get configuration
@@ -37,16 +42,16 @@ def run_attendance():
         print("Gagal terhubung ke database!")
         return
 
-    # Load student data
-    students = load_students(connection)
-    if not students:
-        print("Tidak ada data siswa aktif!")
+    # Load employee data
+    employees = load_students(connection)
+    if not employees:
+        print("Tidak ada data karyawan aktif!")
         connection.close()
         return
 
     print(f"Model dimuat. Threshold confidence: {confidence_threshold}")
     print(f"Batas waktu terlambat: {late_after_str}")
-    print(f"Total siswa aktif: {len(students)}")
+    print(f"Total karyawan aktif: {len(employees)}")
     print("\nTekan 'q' untuk keluar\n")
 
     # Initialize webcam
@@ -82,22 +87,28 @@ def run_attendance():
             # Extract face region
             face_roi = gray[y:y+h, x:x+w]
 
+            # Resize to match training data size
+            face_roi = cv2.resize(face_roi, (150, 150))
+
+            # Apply histogram equalization (same as training)
+            face_roi = cv2.equalizeHist(face_roi)
+
             # Recognize face
-            student_id, confidence = recognizer.predict(face_roi)
+            employee_id, confidence = recognizer.predict(face_roi)
 
             # Check if confidence is within threshold
             if confidence <= confidence_threshold:
-                # Get student info
-                student_info = students.get(student_id)
+                # Get employee info
+                employee_info = employees.get(employee_id)
 
-                if student_info:
-                    name = student_info['name']
-                    nis = student_info['nis']
+                if employee_info:
+                    name = employee_info['name']
+                    nip = employee_info['nip']
 
                     # Check cooldown
                     current_time = datetime.now()
-                    if student_id in recent_recognitions:
-                        last_recognition = recent_recognitions[student_id]
+                    if employee_id in recent_recognitions:
+                        last_recognition = recent_recognitions[employee_id]
                         time_diff = (current_time - last_recognition).total_seconds()
                         if time_diff < recognition_cooldown:
                             # Still in cooldown, skip
@@ -110,13 +121,13 @@ def run_attendance():
                     # Record attendance
                     success, message = record_attendance(
                         connection,
-                        student_id,
+                        employee_id,
                         confidence,
                         late_after_time
                     )
 
                     if success:
-                        recent_recognitions[student_id] = current_time
+                        recent_recognitions[employee_id] = current_time
                         print(f"[{current_time.strftime('%H:%M:%S')}] {message}")
                         label = f"{name} - {message}"
                         color = (0, 255, 0)  # Green
@@ -129,7 +140,7 @@ def run_attendance():
                     cv2.putText(frame, label, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
                     cv2.putText(frame, f"Conf: {confidence:.1f}", (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
                 else:
-                    # Student ID not found in database
+                    # Employee ID not found in database
                     cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
                     cv2.putText(frame, "Unknown ID", (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
             else:
@@ -152,24 +163,25 @@ def run_attendance():
     print("\nSistem absensi ditutup.")
 
 def load_students(connection):
-    """Load active students from database"""
-    students = {}
+    """Load active employees from database"""
+    employees = {}
     try:
         cursor = connection.cursor(dictionary=True)
         cursor.execute("""
-            SELECT id, nis, name, class_name, gender
-            FROM students
-            WHERE is_active = 1
+            SELECT e.id, e.nip, e.name, d.name AS department_name, e.gender
+            FROM employees e
+            LEFT JOIN departments d ON e.department_id = d.id
+            WHERE e.is_active = 1
         """)
         rows = cursor.fetchall()
         for row in rows:
-            students[row['id']] = row
+            employees[row['id']] = row
         cursor.close()
     except Error as e:
-        print(f"Error loading students: {e}")
-    return students
+        print(f"Error loading employees: {e}")
+    return employees
 
-def record_attendance(connection, student_id, confidence, late_after_time):
+def record_attendance(connection, employee_id, confidence, late_after_time):
     """Record attendance to database"""
     try:
         cursor = connection.cursor()
@@ -182,8 +194,8 @@ def record_attendance(connection, student_id, confidence, late_after_time):
         # Check if already attended today
         cursor.execute("""
             SELECT id FROM attendance
-            WHERE student_id = %s AND attendance_date = %s
-        """, (student_id, today))
+            WHERE employee_id = %s AND attendance_date = %s
+        """, (employee_id, today))
 
         if cursor.fetchone():
             cursor.close()
@@ -194,10 +206,10 @@ def record_attendance(connection, student_id, confidence, late_after_time):
 
         # Insert attendance record
         insert_query = """
-            INSERT INTO attendance (student_id, attendance_date, check_in_time, status, confidence)
+            INSERT INTO attendance (employee_id, attendance_date, check_in_time, status, confidence)
             VALUES (%s, %s, %s, %s, %s)
         """
-        cursor.execute(insert_query, (student_id, today, current_time, status, confidence))
+        cursor.execute(insert_query, (employee_id, today, current_time, status, confidence))
         connection.commit()
         cursor.close()
 
